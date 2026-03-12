@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Counter Builder | VINCULUM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../vinculum-core.css">
+<style>
+    /* Theme system loaded from vinculum-core.css */
+.vinculum-rtm-btn .rtm-icon{font-size:14px;}
+
+/* ═══ FOCUS VISIBLE (Keyboard Navigation) ═══ */
+*:focus-visible {
+  outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px;
+}
+.sr-only {
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 24px;
+      top: 16px;
+      text-decoration: none;
+      color: var(--cyan);
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .back-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .header-content {
+      flex: 1;
+      text-align: center;
+      margin-left: 40px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .standards {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Main content */
+    .main {
+      display: flex;
+      flex: 1;
+      gap: 20px;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* Mode tabs */
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      cursor: pointer;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      color: var(--text);
+      background: var(--card);
+    }
+
+    .tab-btn.explore { --color: var(--cyan); }
+    .tab-btn.practice { --color: var(--green); }
+    .tab-btn.play { --color: var(--pink); }
+
+    .tab-btn.active.explore {
+      border: 2px solid var(--cyan);
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+    }
+
+    .tab-btn.active.practice {
+      border: 2px solid var(--green);
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--green);
+    }
+
+    .tab-btn.active.play {
+      border: 2px solid var(--pink);
+      background: rgba(255, 59, 139, 0.1);
+      color: var(--pink);
+    }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      display: flex;
+      gap: 20px;
+      overflow: hidden;
+    }
+
+    .main-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .side-panel {
+      width: 280px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Equation display */
+    .equation-display {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--cyan);
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .equation-part {
+      transition: all 0.3s;
+    }
+
+    .equation-part.highlight {
+      color: var(--yellow);
+      transform: scale(1.1);
+    }
+
+    /* Counter work area */
+    .work-area {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .group-container {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .group {
+      flex: 1;
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .group.active {
+      border-color: var(--cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .group.group-b {
+      border-color: var(--pink);
+      background: rgba(255, 59, 139, 0.05);
+    }
+
+    .group.group-b.active {
+      border-color: var(--pink);
+      background: rgba(255, 59, 139, 0.1);
+    }
+
+    .group-label {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .counters-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 8px;
+    }
+
+    .counter {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .counter:hover {
+      transform: scale(1.15);
+      filter: brightness(1.2);
+    }
+
+    .counter.group-a {
+      background: radial-gradient(circle at 35% 35%, #4de8ff, #00d4ff, #0099cc);
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4), inset 0 -2px 4px rgba(0,0,0,0.2);
+    }
+
+    .counter.group-b {
+      background: radial-gradient(circle at 35% 35%, #ff8ec2, #ff3b8b, #cc2266);
+      box-shadow: 0 4px 12px rgba(255, 59, 139, 0.4), inset 0 -2px 4px rgba(0,0,0,0.2);
+    }
+
+    .counter.crossed {
+      opacity: 0.4;
+      transform: scale(0.85);
+    }
+
+    .counter.crossed::after {
+      content: '';
+      position: absolute;
+      width: 110%;
+      height: 3px;
+      background: #ff4444;
+      transform: rotate(45deg);
+      top: 50%;
+      left: -5%;
+      border-radius: 2px;
+    }
+
+    .counter.crossed::before {
+      content: '';
+      position: absolute;
+      width: 110%;
+      height: 3px;
+      background: #ff4444;
+      transform: rotate(-45deg);
+      top: 50%;
+      left: -5%;
+      border-radius: 2px;
+    }
+
+    @keyframes counting-flash {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.8) drop-shadow(0 0 12px rgba(255, 255, 255, 0.8)); }
+    }
+
+    .counter.counting {
+      animation: counting-flash 0.5s ease-out;
+    }
+
+    .counter-label {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--yellow);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+    }
+
+    /* Control buttons */
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s;
+      border: 1px solid var(--border);
+    }
+
+    .btn:hover {
+      background: var(--card2);
+      border-color: var(--cyan);
+    }
+
+    .btn.primary {
+      background: var(--cyan);
+      color: var(--bg);
+      border-color: var(--cyan);
+    }
+
+    .btn.primary:hover {
+      background: #00e8ff;
+      box-shadow: 0 0 16px rgba(0, 212, 255, 0.5);
+    }
+
+    .btn.success {
+      background: var(--green);
+      color: var(--bg);
+      border-color: var(--green);
+    }
+
+    .btn.success:hover {
+      background: #00ff7f;
+      box-shadow: 0 0 16px rgba(0, 230, 118, 0.5);
+    }
+
+    .btn.active {
+      background: var(--purple);
+      color: white;
+      border-color: var(--purple);
+    }
+
+    .btn.danger {
+      background: var(--pink);
+      color: white;
+      border-color: var(--pink);
+    }
+
+    /* Difficulty selector */
+    .difficulty-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .difficulty-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text2);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .difficulty-btn.active {
+      background: var(--cyan);
+      color: var(--bg);
+      border-color: var(--cyan);
+    }
+
+    /* Side panel sections */
+    .panel-section {
+      padding: 12px;
+      background: var(--bg2);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .panel-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .panel-section-content {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .vocab-list {
+      list-style: none;
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .vocab-list li {
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .vocab-list li:last-child {
+      border-bottom: none;
+    }
+
+    .vocab-term {
+      font-weight: 600;
+      color: var(--cyan);
+    }
+
+    /* Problem display (Practice/Play) */
+    .problem-section {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .problem-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .problem-equation {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--cyan);
+      margin-bottom: 16px;
+    }
+
+    .answer-input {
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      width: 120px;
+      transition: border-color 0.3s;
+    }
+
+    .answer-input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+    }
+
+    .answer-input.correct {
+      border-color: var(--green);
+      background: rgba(0, 230, 118, 0.1);
+    }
+
+    .answer-input.wrong {
+      border-color: var(--pink);
+      background: rgba(255, 59, 139, 0.1);
+    }
+
+    .feedback {
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .feedback.correct {
+      color: var(--green);
+    }
+
+    .feedback.wrong {
+      color: var(--pink);
+    }
+
+    /* Play mode styling */
+    .play-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .timer-score {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+
+    .timer-box, .score-box {
+      flex: 1;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .timer-label, .score-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .timer-value, .score-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .stars {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .ten-frame {
+      display: grid;
+      grid-template-columns: repeat(5, 48px);
+      gap: 6px;
+      margin: 8px auto;
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      justify-content: center;
+    }
+
+    .frame-cell {
+      width: 48px;
+      height: 48px;
+      border: 2px dashed var(--muted);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .frame-cell.filled {
+      border-color: var(--cyan);
+      border-style: solid;
+      background: rgba(0, 212, 255, 0.08);
+    }
+
+    .frame-cell.filled-b {
+      border-color: var(--pink);
+      border-style: solid;
+      background: rgba(255, 59, 139, 0.08);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    @keyframes celebration {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .celebrating {
+      animation: celebration 0.5s ease-out;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <a href="../../index.html" class="back-btn">◀</a>
+      <div class="header-content">
+        <div class="title">Counter Builder</div>
+        <div class="standards">
+          <span class="badge">CCSS 1.OA.A.1</span>
+          <span class="badge">CCSS 1.OA.A.2</span>
+          <span class="badge">CCSS 1.OA.C.5</span>
+          <span class="badge">MN 1.1.1.1</span>
+          <span class="badge">TEKS 1.3A</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main" role="main">
+      <!-- Content area -->
+      <div class="content">
+        <!-- Main panel -->
+        <div class="main-panel">
+          <!-- Mode tabs -->
+          <div class="mode-tabs">
+            <button class="tab-btn explore active" data-mode="explore">
+              <span style="color: var(--cyan);">⊙</span> Explore
+            </button>
+            <button class="tab-btn practice" data-mode="practice">
+              <span style="color: var(--green);">✓</span> Practice
+            </button>
+            <button class="tab-btn play" data-mode="play">
+              <span style="color: var(--pink);">⚡</span> Play
+            </button>
+          </div>
+
+          <!-- EXPLORE MODE -->
+          <div id="explore-mode" class="mode-content">
+            <!-- Equation display -->
+            <div class="equation-display" id="explore-equation">
+              <span class="equation-part" id="eq-a">—</span>
+              <span class="equation-part" id="eq-op">+</span>
+              <span class="equation-part" id="eq-b">—</span>
+              <span class="equation-part">=</span>
+              <span class="equation-part" id="eq-total">—</span>
+            </div>
+
+            <!-- Work area with groups -->
+            <div class="work-area">
+              <div id="tenframe-container" class="hidden"></div>
+              <div class="group-container">
+                <div class="group group-a" id="group-a">
+                  <div class="group-label">Group A</div>
+                  <div class="counters-grid" id="counters-a"></div>
+                </div>
+                <div class="group group-b" id="group-b">
+                  <div class="group-label">Group B</div>
+                  <div class="counters-grid" id="counters-b"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+              <button class="btn primary" id="btn-add-a">+ Add to A</button>
+              <button class="btn primary" id="btn-add-b">+ Add to B</button>
+              <button class="btn" id="btn-remove-a">− Remove A</button>
+              <button class="btn" id="btn-remove-b">− Remove B</button>
+              <button class="btn" id="btn-op-toggle">Switch to −</button>
+              <button class="btn success" id="btn-count-all">Count All</button>
+              <button class="btn success" id="btn-count-on">Count On</button>
+              <button class="btn" id="btn-tenframe-toggle">Ten-Frame</button>
+              <button class="btn danger" id="btn-clear">Clear All</button>
+            </div>
+          </div>
+
+          <!-- PRACTICE MODE -->
+          <div id="practice-mode" class="mode-content hidden">
+            <!-- Difficulty selector -->
+            <div class="difficulty-selector">
+              <button class="difficulty-btn active" data-difficulty="emergent">Emergent</button>
+              <button class="difficulty-btn" data-difficulty="proficient">Proficient</button>
+              <button class="difficulty-btn" data-difficulty="advanced">Advanced</button>
+            </div>
+
+            <!-- Problem -->
+            <div class="problem-section">
+              <div class="problem-label">Problem</div>
+              <div class="problem-equation" id="practice-problem">3 + 4 = ?</div>
+            </div>
+
+            <!-- Work area -->
+            <div class="work-area">
+              <div class="group-container">
+                <div class="group group-a" id="practice-group-a">
+                  <div class="group-label">Group A</div>
+                  <div class="counters-grid" id="practice-counters-a"></div>
+                </div>
+                <div class="group group-b" id="practice-group-b">
+                  <div class="group-label">Group B</div>
+                  <div class="counters-grid" id="practice-counters-b"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Answer input -->
+            <div style="text-align: center; margin-bottom: 16px;">
+              <input type="number" id="practice-answer" class="answer-input" placeholder="?" min="0">
+              <div class="feedback" id="practice-feedback"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+              <button class="btn primary" id="practice-btn-add-a">+ Add to A</button>
+              <button class="btn primary" id="practice-btn-add-b">+ Add to B</button>
+              <button class="btn" id="practice-btn-remove-a">− Remove A</button>
+              <button class="btn" id="practice-btn-remove-b">− Remove B</button>
+              <button class="btn success" id="practice-btn-count">Count All</button>
+              <button class="btn danger" id="practice-btn-next">Next Problem</button>
+            </div>
+          </div>
+
+          <!-- PLAY MODE -->
+          <div id="play-mode" class="mode-content hidden">
+            <div class="play-container">
+              <!-- Timer and score -->
+              <div class="timer-score">
+                <div class="timer-box">
+                  <div class="timer-label">Time</div>
+                  <div class="timer-value" id="timer">60s</div>
+                </div>
+                <div class="score-box">
+                  <div class="score-label">Streak</div>
+                  <div class="score-value" id="streak">0/10</div>
+                </div>
+              </div>
+
+              <!-- Problem -->
+              <div class="problem-section">
+                <div class="problem-label">Solve</div>
+                <div class="problem-equation" id="play-problem">3 + 4</div>
+              </div>
+
+              <!-- Answer input -->
+              <div style="text-align: center; margin-bottom: 16px;">
+                <input type="number" id="play-answer" class="answer-input" placeholder="?" min="0" autofocus>
+                <div class="feedback" id="play-feedback"></div>
+              </div>
+
+              <!-- Stars -->
+              <div class="stars" id="play-stars"></div>
+
+              <!-- Controls -->
+              <div class="controls">
+                <button class="btn success" id="play-btn-start">Start Game</button>
+                <button class="btn danger" id="play-btn-stop" class="hidden">Stop Game</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side panel -->
+        <div class="side-panel">
+          <!-- Vocabulary -->
+          <div class="panel-section">
+            <div class="panel-section-title">Vocabulary</div>
+            <ul class="vocab-list">
+              <li><span class="vocab-term">Addend:</span> a number being added</li>
+              <li><span class="vocab-term">Sum:</span> the result of addition</li>
+              <li><span class="vocab-term">Equation:</span> math statement with =</li>
+              <li><span class="vocab-term">Count On:</span> start at a number, count up</li>
+              <li><span class="vocab-term">Count All:</span> count every counter</li>
+              <li><span class="vocab-term">Ten-Frame:</span> organize counters by 10s</li>
+            </ul>
+          </div>
+
+          <!-- Strategies -->
+          <div class="panel-section">
+            <div class="panel-section-title">Strategies</div>
+            <div class="panel-section-content">
+              <strong>Count All:</strong> Count every counter from 1.<br><br>
+              <strong>Count On:</strong> Say the first number, then count the second group. Faster!<br><br>
+              <strong>Make a 10:</strong> Group counters to make 10 first, then add more.
+            </div>
+          </div>
+
+          <!-- Tips -->
+          <div class="panel-section">
+            <div class="panel-section-title">Tips</div>
+            <div class="panel-section-content">
+              • Use the ten-frame to organize counters<br>
+              • Try counting on instead of counting all<br>
+              • Look for patterns (like doubles: 3+3, 4+4)<br>
+              • Group counters neatly to count easier
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="feedback" id="feedback"></div>
+  <script>
+function showFB(t,c){var f=document.getElementById("feedback");if(!f)return;f.textContent=t;f.className="feedback "+c+" show";setTimeout(function(){f.classList.remove("show");},1200);}
+    // ============================================
+    // STATE MACHINE
+    // ============================================
+    const S = {
+      mode: 'explore',
+      difficulty: 'emergent',
+      operation: 'add', // 'add' or 'subtract'
+      countA: 0,
+      countB: 0,
+      tenframeActive: false,
+      countingTimeout: null,
+      countingAnimations: [],
+
+      // Practice mode state
+      currentProblem: null,
+      practiceSubmitted: false,
+
+      // Play mode state
+      playStarted: false,
+      playScore: 0,
+      playTotal: 10,
+      playTimeLeft: 60,
+      playTimer: null,
+    };
+
+    // ============================================
+    // HELPERS
+    // ============================================
+    function clearAllTimeouts() {
+      if (S.countingTimeout) {
+        clearTimeout(S.countingTimeout);
+        S.countingTimeout = null;
+      }
+      S.countingAnimations.forEach(t => clearTimeout(t));
+      S.countingAnimations = [];
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function getMaxValue() {
+      if (S.difficulty === 'emergent') return 5;
+      if (S.difficulty === 'proficient') return 10;
+      return 20;
+    }
+
+    function generateProblem() {
+      const max = getMaxValue();
+      let a = Math.floor(Math.random() * max) + 1;
+      let b = Math.floor(Math.random() * max) + 1;
+
+      const isAddition = Math.random() > 0.3;
+      const op = isAddition ? 'add' : 'subtract';
+
+      if (op === 'subtract' && b > a) {
+        const temp = a; a = b; b = temp;
+      }
+
+      // Clamp sum to max
+      if (op === 'add' && a + b > max) {
+        b = max - a;
+        if (b < 1) { a = max - 1; b = 1; }
+      }
+
+      return { a, b, op };
+    }
+
+    // ============================================
+    // RENDER FUNCTIONS
+    // ============================================
+    function updateEquationDisplay() {
+      const total = S.operation === 'add' ? S.countA + S.countB : S.countA - S.countB;
+      document.getElementById('eq-a').textContent = S.countA || '—';
+      document.getElementById('eq-op').textContent = S.operation === 'add' ? '+' : '−';
+      document.getElementById('eq-b').textContent = S.countB || '—';
+      document.getElementById('eq-total').textContent = total >= 0 ? total : '—';
+    }
+
+    function renderCounters(containerId, count, group) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.className = `counter ${group === 'a' ? 'group-a' : 'group-b'}`;
+        div.dataset.index = i;
+        div.dataset.group = group;
+        div.textContent = '';
+
+        if (S.mode === 'explore' && S.operation === 'subtract' && group === 'a') {
+          div.style.cursor = 'pointer';
+          div.addEventListener('click', () => toggleCounterCrossed(div));
+        }
+
+        container.appendChild(div);
+      }
+    }
+
+    function toggleCounterCrossed(el) {
+      el.classList.toggle('crossed');
+      updateEquationDisplay();
+    }
+
+    function renderTenFrame() {
+      const container = document.getElementById('tenframe-container');
+      if (!S.tenframeActive) {
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+      const total = S.countA + S.countB;
+      let h = '<div style="text-align:center;font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Ten-Frame</div>';
+      h += '<div class="ten-frame">';
+      for (let i = 0; i < 10; i++) {
+        const isA = i < S.countA;
+        const isB = i >= S.countA && i < total;
+        const filled = isA ? 'filled' : isB ? 'filled-b' : '';
+        h += `<div class="frame-cell ${filled}">`;
+        if (isA) {
+          h += `<div class="counter group-a" style="width:32px;height:32px;font-size:12px;"></div>`;
+        } else if (isB) {
+          h += `<div class="counter group-b" style="width:32px;height:32px;font-size:12px;"></div>`;
+        }
+        h += '</div>';
+      }
+      h += '</div>';
+      if (total > 10) {
+        h += '<div class="ten-frame" style="margin-top:4px;">';
+        for (let i = 10; i < 20; i++) {
+          const isA = i < S.countA;
+          const isB = i >= S.countA && i < total;
+          const filled = isA ? 'filled' : isB ? 'filled-b' : '';
+          h += `<div class="frame-cell ${filled}">`;
+          if (isA) {
+            h += `<div class="counter group-a" style="width:32px;height:32px;font-size:12px;"></div>`;
+          } else if (isB) {
+            h += `<div class="counter group-b" style="width:32px;height:32px;font-size:12px;"></div>`;
+          }
+          h += '</div>';
+        }
+        h += '</div>';
+      }
+      container.innerHTML = h;
+    }
+
+    function render() {
+      if (S.mode === 'explore') {
+        renderExplore();
+      } else if (S.mode === 'practice') {
+        renderPractice();
+      } else if (S.mode === 'play') {
+        renderPlay();
+      }
+    }
+
+    function renderExplore() {
+      updateEquationDisplay();
+      renderCounters('counters-a', S.countA, 'a');
+      renderCounters('counters-b', S.countB, 'b');
+      renderTenFrame();
+
+      document.getElementById('btn-op-toggle').textContent =
+        S.operation === 'add' ? 'Switch to −' : 'Switch to +';
+
+      document.getElementById('btn-tenframe-toggle').textContent =
+        S.tenframeActive ? 'Hide Ten-Frame' : 'Ten-Frame';
+    }
+
+    function renderPractice() {
+      if (!S.currentProblem) {
+        S.currentProblem = generateProblem();
+        S.countA = 0;
+        S.countB = 0;
+        S.practiceSubmitted = false;
+      }
+
+      const { a, b, op } = S.currentProblem;
+      S.operation = op;
+
+      const opSymbol = op === 'add' ? '+' : '−';
+      document.getElementById('practice-problem').textContent = `${a} ${opSymbol} ${b} = ?`;
+
+      // Pre-place counters in Group A for emergent mode
+      if (S.difficulty === 'emergent' && S.countA === 0) {
+        S.countA = a;
+      }
+
+      renderCounters('practice-counters-a', S.countA, 'a');
+      renderCounters('practice-counters-b', S.countB, 'b');
+
+      // Hide Group B for subtraction
+      if (op === 'subtract') {
+        document.getElementById('practice-group-b').style.display = 'none';
+      } else {
+        document.getElementById('practice-group-b').style.display = 'flex';
+      }
+    }
+
+    function renderPlay() {
+      if (S.currentProblem) {
+        const { a, b, op } = S.currentProblem;
+        const opSymbol = op === 'add' ? '+' : '−';
+        document.getElementById('play-problem').textContent = `${a} ${opSymbol} ${b}`;
+      }
+
+      document.getElementById('timer').textContent = S.playTimeLeft + 's';
+      document.getElementById('streak').textContent = `${S.playScore}/${S.playTotal}`;
+    }
+
+    // ============================================
+    // MODE SWITCHING
+    // ============================================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        clearAllTimeouts();
+
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.mode-content').forEach(c => c.classList.add('hidden'));
+
+        S.mode = btn.dataset.mode;
+
+        if (S.mode === 'explore') {
+          document.getElementById('explore-mode').classList.remove('hidden');
+          S.countA = 0;
+          S.countB = 0;
+          S.operation = 'add';
+          render();
+        } else if (S.mode === 'practice') {
+          document.getElementById('practice-mode').classList.remove('hidden');
+          S.countA = 0;
+          S.countB = 0;
+          S.practiceSubmitted = false;
+          S.currentProblem = null;
+          render();
+        } else if (S.mode === 'play') {
+          document.getElementById('play-mode').classList.remove('hidden');
+          S.playStarted = false;
+          S.playScore = 0;
+          S.playTimeLeft = 60;
+          S.countA = 0;
+          S.countB = 0;
+          S.currentProblem = null;
+          render();
+        }
+      });
+    });
+
+    // ============================================
+    // DIFFICULTY SELECTOR
+    // ============================================
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        S.difficulty = btn.dataset.difficulty;
+        S.countA = 0;
+        S.countB = 0;
+        S.currentProblem = null;
+        S.practiceSubmitted = false;
+        render();
+      });
+    });
+
+    // ============================================
+    // EXPLORE MODE HANDLERS
+    // ============================================
+    document.getElementById('btn-add-a').addEventListener('click', () => {
+      const max = getMaxValue();
+      if (S.countA < max) {
+        S.countA++;
+        render();
+      }
+    });
+
+    document.getElementById('btn-add-b').addEventListener('click', () => {
+      const max = getMaxValue();
+      if (S.countB < max) {
+        S.countB++;
+        render();
+      }
+    });
+
+    document.getElementById('btn-remove-a').addEventListener('click', () => {
+      if (S.countA > 0) {
+        S.countA--;
+        render();
+      }
+    });
+
+    document.getElementById('btn-remove-b').addEventListener('click', () => {
+      if (S.countB > 0) {
+        S.countB--;
+        render();
+      }
+    });
+
+    document.getElementById('btn-op-toggle').addEventListener('click', () => {
+      S.operation = S.operation === 'add' ? 'subtract' : 'add';
+      if (S.operation === 'subtract' && S.countB > S.countA) {
+        S.countB = S.countA;
+      }
+      render();
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      S.countA = 0;
+      S.countB = 0;
+      clearAllTimeouts();
+      render();
+    });
+
+    document.getElementById('btn-tenframe-toggle').addEventListener('click', () => {
+      S.tenframeActive = !S.tenframeActive;
+      render();
+    });
+
+    document.getElementById('btn-count-all').addEventListener('click', () => {
+      clearAllTimeouts();
+      countAll();
+    });
+
+    document.getElementById('btn-count-on').addEventListener('click', () => {
+      clearAllTimeouts();
+      countOn();
+    });
+
+    // ============================================
+    // COUNTING ANIMATIONS
+    // ============================================
+    function countAll() {
+      const total = S.operation === 'add' ? S.countA + S.countB : Math.max(0, S.countA - S.countB);
+      const containerA = document.getElementById('counters-a');
+      const containerB = document.getElementById('counters-b');
+      const allCounters = [
+        ...(containerA?.querySelectorAll('.counter') || []),
+        ...(containerB?.querySelectorAll('.counter') || [])
+      ];
+
+      if (S.operation === 'subtract') {
+        const uncrossed = allCounters.filter(c => !c.classList.contains('crossed'));
+        uncrossed.forEach((c, i) => {
+          animateCounterFlash(c, i + 1, i * 500);
+        });
+        S.countingTimeout = setTimeout(() => showFinalTotal(uncrossed.length), uncrossed.length * 500 + 200);
+      } else {
+        allCounters.forEach((c, i) => {
+          animateCounterFlash(c, i + 1, i * 500);
+        });
+        S.countingTimeout = setTimeout(() => showFinalTotal(total), allCounters.length * 500 + 200);
+      }
+    }
+
+    function countOn() {
+      if (S.countA === 0) return;
+
+      const containerA = document.getElementById('counters-a');
+      const containerB = document.getElementById('counters-b');
+      const countersA = containerA?.querySelectorAll('.counter') || [];
+      const countersB = containerB?.querySelectorAll('.counter') || [];
+
+      // Flash A's total first
+      countersA.forEach((c, i) => {
+        if (i === countersA.length - 1) {
+          animateCounterFlash(c, S.countA, 0);
+        }
+      });
+
+      // Then count B starting from A's value
+      countersB.forEach((c, i) => {
+        const num = S.countA + i + 1;
+        animateCounterFlash(c, num, (i + 1) * 500);
+      });
+
+      const total = S.operation === 'add' ? S.countA + S.countB : Math.max(0, S.countA - S.countB);
+      S.countingTimeout = setTimeout(() => showFinalTotal(total), (countersB.length + 1) * 500 + 200);
+    }
+
+    function animateCounterFlash(el, num, delay) {
+      const t = setTimeout(() => {
+        el.classList.add('counting');
+        el.textContent = num;
+        el.style.transform = 'scale(1.3)';
+        el.style.filter = 'brightness(1.5) drop-shadow(0 0 10px rgba(255,255,255,0.6))';
+
+        setTimeout(() => {
+          el.classList.remove('counting');
+          el.textContent = '';
+          el.style.transform = '';
+          el.style.filter = '';
+        }, 450);
+      }, delay);
+
+      S.countingAnimations.push(t);
+    }
+
+    function showFinalTotal(total) {
+      const eqTotal = document.getElementById('eq-total');
+      if (eqTotal) {
+        eqTotal.textContent = total;
+        eqTotal.classList.add('celebrating');
+        eqTotal.style.color = 'var(--green)';
+        eqTotal.style.fontSize = '44px';
+        setTimeout(() => {
+          eqTotal.classList.remove('celebrating');
+          eqTotal.style.fontSize = '';
+        }, 800);
+      }
+    }
+
+    // ============================================
+    // PRACTICE MODE HANDLERS
+    // ============================================
+    document.getElementById('practice-btn-add-a').addEventListener('click', () => {
+      const max = getMaxValue();
+      if (S.countA < max) {
+        S.countA++;
+        render();
+      }
+    });
+
+    document.getElementById('practice-btn-add-b').addEventListener('click', () => {
+      const max = getMaxValue();
+      if (S.countB < max) {
+        S.countB++;
+        render();
+      }
+    });
+
+    document.getElementById('practice-btn-remove-a').addEventListener('click', () => {
+      if (S.countA > 0) {
+        S.countA--;
+        render();
+      }
+    });
+
+    document.getElementById('practice-btn-remove-b').addEventListener('click', () => {
+      if (S.countB > 0) {
+        S.countB--;
+        render();
+      }
+    });
+
+    document.getElementById('practice-btn-count').addEventListener('click', () => {
+      clearAllTimeouts();
+      countAll();
+    });
+
+    document.getElementById('practice-btn-next').addEventListener('click', () => {
+      clearAllTimeouts();
+      S.currentProblem = null;
+      S.countA = 0;
+      S.countB = 0;
+      S.practiceSubmitted = false;
+      document.getElementById('practice-answer').value = '';
+      document.getElementById('practice-feedback').textContent = '';
+      document.getElementById('practice-answer').classList.remove('correct', 'wrong');
+      render();
+    });
+
+    document.getElementById('practice-answer').addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        checkPracticeAnswer();
+      }
+    });
+
+    function checkPracticeAnswer() {
+      const { a, b, op } = S.currentProblem;
+      const expected = op === 'add' ? a + b : a - b;
+      const given = parseInt(document.getElementById('practice-answer').value);
+
+      const feedback = document.getElementById('practice-feedback');
+      const input = document.getElementById('practice-answer');
+
+      if (isNaN(given)) {
+        feedback.textContent = 'Enter a number';
+        feedback.classList.remove('correct', 'wrong');
+        return;
+      }
+
+      if (given === expected) {
+        showFB('✓ Correct!','correct');
+        input.classList.remove('wrong');
+        input.classList.add('correct');
+        feedback.classList.remove('wrong');
+        feedback.classList.add('correct');
+        feedback.textContent = '✓ Correct!';
+      } else {
+        showFB('Try again!','incorrect');
+        input.classList.remove('correct');
+        input.classList.add('wrong');
+        feedback.classList.remove('correct');
+        feedback.classList.add('wrong');
+        feedback.textContent = 'Not quite, count again!';
+      }
+    }
+
+    // ============================================
+    // PLAY MODE HANDLERS
+    // ============================================
+    document.getElementById('play-btn-start').addEventListener('click', () => {
+      S.playStarted = true;
+      S.playScore = 0;
+      S.playTimeLeft = 60;
+      S.currentProblem = generateProblem();
+      document.getElementById('play-btn-start').classList.add('hidden');
+      document.getElementById('play-btn-stop').classList.remove('hidden');
+      document.getElementById('play-answer').focus();
+      startPlayTimer();
+      render();
+    });
+
+    document.getElementById('play-btn-stop').addEventListener('click', () => {
+      endPlayGame();
+    });
+
+    document.getElementById('play-answer').addEventListener('keyup', (e) => {
+      if (e.key === 'Enter' && S.playStarted) {
+        checkPlayAnswer();
+      }
+    });
+
+    function startPlayTimer() {
+      S.playTimer = setInterval(() => {
+        S.playTimeLeft--;
+        render();
+        if (S.playTimeLeft <= 0) {
+          endPlayGame();
+        }
+      }, 1000);
+    }
+
+    function checkPlayAnswer() {
+      const { a, b, op } = S.currentProblem;
+      const expected = op === 'add' ? a + b : a - b;
+      const given = parseInt(document.getElementById('play-answer').value);
+
+      if (given === expected) {
+        S.playScore++;
+        document.getElementById('play-stars').textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;"><polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18 5.5,22 7,14.5 2,9.5 9,9"/></svg>'.repeat(
+          S.playScore >= 8 ? 3 : S.playScore >= 5 ? 2 : 1
+        );
+      }
+
+      if (S.playScore >= S.playTotal) {
+        endPlayGame();
+      } else {
+        S.currentProblem = generateProblem();
+        document.getElementById('play-answer').value = '';
+        render();
+      }
+    }
+
+    function endPlayGame() {
+      clearInterval(S.playTimer);
+      S.playStarted = false;
+      document.getElementById('play-btn-start').classList.remove('hidden');
+      document.getElementById('play-btn-stop').classList.add('hidden');
+      document.getElementById('play-answer').value = '';
+      render();
+    }
+
+    // Initial render
+    render();
+  </script>
+<script src="../../vinculum-core.js"></script>
+<!-- Foundation loaded from vinculum-core.js -->
+</body>
+</html>

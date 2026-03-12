@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VINCULUM — Fraction Shapes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../vinculum-core.css">
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Theme system loaded from vinculum-core.css */
+.vinculum-rtm-btn .rtm-icon{font-size:14px;}
+
+/* ═══ FOCUS VISIBLE (Keyboard Navigation) ═══ */
+*:focus-visible {
+  outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px;
+}
+.sr-only {
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .back-btn {
+  display:inline-block;padding:6px 12px;border-radius:8px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text2);font-size:13px;font-family:inherit;
+  cursor:pointer;transition:all 0.2s;text-decoration:none;
+}
+.back-btn:hover { background:var(--card); color:var(--cyan); }
+header {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .badge {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--cyan);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text2);
+        }
+
+        .tag {
+            background: rgba(0, 212, 255, 0.08);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        /* Mode tabs */
+        .modes {
+            display: flex;
+            gap: 8px;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            flex-shrink: 0;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .mode-btn.active {
+            background: var(--grad);
+            border-color: transparent;
+            color: var(--bg);
+        }
+
+        /* Main content */
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+        }
+
+        .shape-toggle {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .toggle-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background: var(--cyan);
+            border-color: var(--cyan);
+            color: var(--bg);
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--cyan);
+        }
+
+        /* Shape display */
+        .shape-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin-bottom: 24px;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 12px rgba(0, 212, 255, 0.1));
+        }
+
+        .shape-piece {
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .shape-piece:hover {
+            opacity: 0.8;
+        }
+
+        /* Partition controls */
+        .partition-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .partition-btn {
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .partition-btn:hover {
+            border-color: var(--cyan);
+            background: var(--card2);
+        }
+
+        .partition-btn.active {
+            background: var(--cyan);
+            border-color: var(--cyan);
+            color: var(--bg);
+        }
+
+        /* Fraction label */
+        .fraction-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--cyan);
+            text-align: center;
+            margin-bottom: 24px;
+            min-height: 24px;
+        }
+
+        .fraction-desc {
+            font-size: 14px;
+            color: var(--text2);
+            margin-top: 6px;
+        }
+
+        /* Insight buttons */
+        .insights {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .insight-btn {
+            padding: 10px 14px;
+            background: rgba(179, 136, 255, 0.1);
+            border: 1px solid rgba(179, 136, 255, 0.3);
+            color: var(--purple);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .insight-btn:hover {
+            background: rgba(179, 136, 255, 0.2);
+            border-color: var(--purple);
+        }
+
+        /* Side panel */
+        .side-panel {
+            width: 280px;
+            background: var(--card);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .vocab-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vocab-item:last-child {
+            border-bottom: none;
+        }
+
+        .vocab-term {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--cyan);
+            margin-bottom: 6px;
+        }
+
+        .vocab-def {
+            font-size: 12px;
+            color: var(--text2);
+            line-height: 1.5;
+        }
+
+        /* Practice mode */
+        .practice-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 24px;
+        }
+
+        .practice-question {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .practice-shape {
+            position: relative;
+            width: 240px;
+            height: 240px;
+        }
+
+        .choices {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .choice-btn {
+            padding: 12px 20px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .choice-btn:hover {
+            border-color: var(--cyan);
+            background: var(--card2);
+        }
+
+        .choice-btn.selected {
+            background: var(--cyan);
+            border-color: var(--cyan);
+            color: var(--bg);
+        }
+
+        .choice-btn.correct {
+            background: var(--green);
+            border-color: var(--green);
+            color: var(--bg);
+            box-shadow: 0 0 16px rgba(0, 230, 118, 0.4);
+        }
+
+        .choice-btn.incorrect {
+            animation: shake 0.4s ease;
+            border-color: var(--pink);
+            background: rgba(255, 59, 139, 0.1);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* Play mode */
+        .play-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 24px;
+        }
+
+        .play-header {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .play-stat {
+            text-align: center;
+        }
+
+        .play-stat-label {
+            font-size: 12px;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .play-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .timer {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--orange);
+            padding: 8px 16px;
+            background: rgba(255, 145, 0, 0.1);
+            border: 1px solid rgba(255, 145, 0, 0.3);
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+
+        .timer.warning {
+            color: var(--pink);
+            border-color: rgba(255, 59, 139, 0.3);
+            background: rgba(255, 59, 139, 0.1);
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .answer-btn {
+            padding: 16px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--cyan);
+            background: var(--card2);
+        }
+
+        .answer-btn.correct {
+            background: var(--green);
+            border-color: var(--green);
+            color: var(--bg);
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+        }
+
+        .answer-btn.incorrect {
+            animation: shake 0.4s ease;
+            border-color: var(--pink);
+            background: rgba(255, 59, 139, 0.1);
+        }
+
+        .answer-mini-shape {
+            width: 60px;
+            height: 60px;
+        }
+
+        /* Feedback */
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--green);
+            color: var(--bg);
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1000;
+            pointer-events: none;
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Scrollbar */
+        .side-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .side-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .side-panel::-webkit-scrollbar-thumb {
+            background: var(--muted);
+            border-radius: 3px;
+        }
+
+        .side-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--text2);
+        }
+    
+</style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                
+        <a class="back-btn" href="../../index.html" style="text-decoration:none;">◀ Hub</a>
+        <div class="header-title">VINCULUM — Fraction Shapes</div>
+                <div class="badge">1.G</div>
+            </div>
+            <div class="tags">
+                <div class="tag">1.G.A.2</div>
+                <div class="tag">1.G.A.3</div>
+            </div>
+        </header>
+
+        <!-- Mode tabs -->
+        <div class="modes">
+            <button class="mode-btn active" data-mode="explore">Explore</button>
+            <button class="mode-btn" data-mode="practice">Practice</button>
+            <button class="mode-btn" data-mode="play">Play</button>
+        </div>
+
+        <!-- Main content -->
+        <div class="content">
+            <!-- EXPLORE MODE -->
+            <div id="explore-mode" class="workspace" role="main">
+                <div class="shape-toggle">
+                    <button class="toggle-btn active" data-shape="circle">Circle</button>
+                    <button class="toggle-btn" data-shape="rectangle">Rectangle</button>
+                </div>
+
+                <div class="shape-container">
+                    <svg id="shape-svg" viewBox="0 0 300 300"></svg>
+                </div>
+
+                <div class="partition-controls">
+                    <button class="partition-btn active" data-partition="whole">Whole</button>
+                    <button class="partition-btn" data-partition="halves">Halves</button>
+                    <button class="partition-btn" data-partition="fourths">Fourths</button>
+                </div>
+
+                <div class="fraction-label">
+                    <div id="fraction-text">No pieces shaded</div>
+                    <div class="fraction-desc" id="fraction-desc"></div>
+                </div>
+
+                <div class="insights">
+                    <button class="insight-btn" data-insight="halves">2 halves = 1 whole</button>
+                    <button class="insight-btn" data-insight="fourths">4 fourths = 1 whole</button>
+                    <button class="insight-btn" data-insight="equivalence">2 fourths = 1 half</button>
+                </div>
+            </div>
+
+            <!-- PRACTICE MODE -->
+            <div id="practice-mode" class="workspace hidden">
+                <div class="practice-container">
+                    <div class="practice-question" id="practice-q"></div>
+                    <div class="practice-shape">
+                        <svg id="practice-svg" viewBox="0 0 300 300"></svg>
+                    </div>
+                    <div class="choices" id="practice-choices"></div>
+                </div>
+            </div>
+
+            <!-- PLAY MODE -->
+            <div id="play-mode" class="workspace hidden">
+                <div class="play-container">
+                    <div class="play-header">
+                        <div class="play-stat">
+                            <div class="play-stat-label">Score</div>
+                            <div class="play-stat-value" id="play-score">0</div>
+                        </div>
+                        <div class="play-stat">
+                            <div class="play-stat-label">Streak</div>
+                            <div class="play-stat-value" id="play-streak">0</div>
+                        </div>
+                    </div>
+                    <div class="play-question" id="play-q" style="font-size: 16px; font-weight: 600; color: var(--text); text-align: center; margin-bottom: 24px;">What fraction is shaded?</div>
+                    <div class="practice-shape">
+                        <svg id="play-svg" viewBox="0 0 300 300"></svg>
+                    </div>
+                    <div class="timer" id="play-timer">8s</div>
+                    <div class="answers" id="play-answers"></div>
+                </div>
+            </div>
+
+            <!-- SIDE PANEL -->
+            <div class="side-panel">
+                <div class="panel-title">Vocabulary</div>
+
+                <div class="vocab-item">
+                    <div class="vocab-term">Whole</div>
+                    <div class="vocab-def">One complete shape with no pieces removed.</div>
+                </div>
+
+                <div class="vocab-item">
+                    <div class="vocab-term">Half / Halves</div>
+                    <div class="vocab-def">One of two equal parts. Two halves make one whole.</div>
+                </div>
+
+                <div class="vocab-item">
+                    <div class="vocab-term">Fourth / Fourths</div>
+                    <div class="vocab-def">One of four equal parts. Four fourths make one whole.</div>
+                </div>
+
+                <div class="vocab-item">
+                    <div class="vocab-term">Quarter</div>
+                    <div class="vocab-def">Another word for one fourth.</div>
+                </div>
+
+                <div class="vocab-item">
+                    <div class="vocab-term">Equal Parts</div>
+                    <div class="vocab-def">Pieces that are the same size and shape.</div>
+                </div>
+
+                <div class="vocab-item">
+                    <div class="vocab-term">Partition</div>
+                    <div class="vocab-def">To divide a shape into equal parts.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="feedback" id="feedback"></div>
+    <script>
+function showFB(t,c){var f=document.getElementById("feedback");if(!f)return;f.textContent=t;f.className="feedback "+c+" show";setTimeout(function(){f.classList.remove("show");},1200);}
+        // State management
+        const S = {
+            mode: 'explore',
+            shape: 'circle',
+            partition: 'whole',
+            shaded: [],
+            practiceLevel: 'emergent',
+            practiceType: 'parts-count',
+            playScore: 0,
+            playStreak: 0,
+            playTimeLeft: 8,
+            playAnswered: false,
+            playCorrect: false,
+            playQuestion: null,
+            animating: false
+        };
+
+        // Utility: render shapes
+        function renderCircle(shaded = []) {
+            const svg = document.getElementById('shape-svg');
+            svg.innerHTML = '';
+
+            const cx = 150, cy = 150, r = 100;
+
+            // Draw based on partition
+            if (S.partition === 'whole') {
+                const circle = createSVGElement('circle', {
+                    cx, cy, r,
+                    fill: shaded.includes(0) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 0
+                });
+                svg.appendChild(circle);
+            } else if (S.partition === 'halves') {
+                // Top half
+                const path1 = createSVGElement('path', {
+                    d: `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} L ${cx + r} ${cy} Q ${cx} ${cy + r} ${cx - r} ${cy}`,
+                    fill: shaded.includes(0) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 0
+                });
+                svg.appendChild(path1);
+
+                // Bottom half
+                const path2 = createSVGElement('path', {
+                    d: `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy} L ${cx + r} ${cy} Q ${cx} ${cy + r} ${cx - r} ${cy}`,
+                    fill: shaded.includes(1) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 1
+                });
+                svg.appendChild(path2);
+
+                // Dividing line
+                const line = createSVGElement('line', {
+                    x1: cx - r, y1: cy, x2: cx + r, y2: cy,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                svg.appendChild(line);
+            } else if (S.partition === 'fourths') {
+                // Create 4 quadrants
+                const positions = [
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} L ${cx} ${cy}`, id: 0 },
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy} L ${cx} ${cy}`, id: 1 },
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 0 ${cx - r} ${cy} L ${cx} ${cy}`, id: 2 },
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${cx - r} ${cy} L ${cx} ${cy}`, id: 3 }
+                ];
+
+                positions.forEach(pos => {
+                    const path = createSVGElement('path', {
+                        d: pos.d,
+                        fill: shaded.includes(pos.id) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2,
+                        class: 'shape-piece',
+                        'data-id': pos.id
+                    });
+                    svg.appendChild(path);
+                });
+
+                // Dividing lines
+                const hline = createSVGElement('line', {
+                    x1: cx - r, y1: cy, x2: cx + r, y2: cy,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                const vline = createSVGElement('line', {
+                    x1: cx, y1: cy - r, x2: cx, y2: cy + r,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                svg.appendChild(hline);
+                svg.appendChild(vline);
+            }
+
+            // Attach listeners
+            document.querySelectorAll('#shape-svg .shape-piece').forEach(piece => {
+                piece.addEventListener('click', (e) => {
+                    if (S.animating) return;
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    const idx = S.shaded.indexOf(id);
+                    if (idx === -1) S.shaded.push(id);
+                    else S.shaded.splice(idx, 1);
+                    updateFractionLabel();
+                    renderCircle(S.shaded);
+                });
+            });
+        }
+
+        function renderRectangle(shaded = []) {
+            const svg = document.getElementById('shape-svg');
+            svg.innerHTML = '';
+
+            const x = 50, y = 50, w = 200, h = 200;
+
+            if (S.partition === 'whole') {
+                const rect = createSVGElement('rect', {
+                    x, y, width: w, height: h,
+                    fill: shaded.includes(0) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 0
+                });
+                svg.appendChild(rect);
+            } else if (S.partition === 'halves') {
+                // Left half
+                const rect1 = createSVGElement('rect', {
+                    x, y, width: w / 2, height: h,
+                    fill: shaded.includes(0) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 0
+                });
+                svg.appendChild(rect1);
+
+                // Right half
+                const rect2 = createSVGElement('rect', {
+                    x: x + w / 2, y, width: w / 2, height: h,
+                    fill: shaded.includes(1) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 1
+                });
+                svg.appendChild(rect2);
+
+                // Dividing line
+                const line = createSVGElement('line', {
+                    x1: x + w / 2, y1: y, x2: x + w / 2, y2: y + h,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                svg.appendChild(line);
+            } else if (S.partition === 'fourths') {
+                const positions = [
+                    { x, y, width: w / 2, height: h / 2, id: 0 },
+                    { x: x + w / 2, y, width: w / 2, height: h / 2, id: 1 },
+                    { x, y: y + h / 2, width: w / 2, height: h / 2, id: 2 },
+                    { x: x + w / 2, y: y + h / 2, width: w / 2, height: h / 2, id: 3 }
+                ];
+
+                positions.forEach(pos => {
+                    const rect = createSVGElement('rect', {
+                        x: pos.x, y: pos.y, width: pos.width, height: pos.height,
+                        fill: shaded.includes(pos.id) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2,
+                        class: 'shape-piece',
+                        'data-id': pos.id
+                    });
+                    svg.appendChild(rect);
+                });
+
+                // Dividing lines
+                const hline = createSVGElement('line', {
+                    x1: x, y1: y + h / 2, x2: x + w, y2: y + h / 2,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                const vline = createSVGElement('line', {
+                    x1: x + w / 2, y1: y, x2: x + w / 2, y2: y + h,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                svg.appendChild(hline);
+                svg.appendChild(vline);
+            }
+
+            // Attach listeners
+            document.querySelectorAll('#shape-svg .shape-piece').forEach(piece => {
+                piece.addEventListener('click', (e) => {
+                    if (S.animating) return;
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    const idx = S.shaded.indexOf(id);
+                    if (idx === -1) S.shaded.push(id);
+                    else S.shaded.splice(idx, 1);
+                    updateFractionLabel();
+                    renderRectangle(S.shaded);
+                });
+            });
+        }
+
+        function createSVGElement(tag, attrs) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            Object.keys(attrs).forEach(key => {
+                el.setAttribute(key, attrs[key]);
+            });
+            return el;
+        }
+
+        function updateFractionLabel() {
+            const total = S.partition === 'whole' ? 1 : S.partition === 'halves' ? 2 : 4;
+            const shaded = S.shaded.length;
+
+            const labelEl = document.getElementById('fraction-text');
+            const descEl = document.getElementById('fraction-desc');
+
+            if (shaded === 0) {
+                labelEl.textContent = 'No pieces shaded';
+                descEl.textContent = '';
+            } else {
+                const fractionName = {
+                    '1/2': 'one half',
+                    '2/2': 'two halves (one whole)',
+                    '1/4': 'one fourth',
+                    '2/4': 'two fourths',
+                    '3/4': 'three fourths',
+                    '4/4': 'four fourths (one whole)'
+                }[`${shaded}/${total}`];
+
+                labelEl.textContent = `${shaded} of ${total} equal parts`;
+                descEl.textContent = fractionName || '';
+            }
+        }
+
+        // Mode switching
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                S.mode = e.target.dataset.mode;
+
+                document.querySelectorAll('.workspace').forEach(w => w.classList.add('hidden'));
+                document.getElementById(`${S.mode}-mode`).classList.remove('hidden');
+
+                if (S.mode === 'practice') initPractice();
+                else if (S.mode === 'play') initPlay();
+            });
+        });
+
+        // Shape toggle (Explore)
+        document.querySelectorAll('.shape-toggle .toggle-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.shape-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                S.shape = e.target.dataset.shape;
+                S.shaded = [];
+                updateFractionLabel();
+                render();
+            });
+        });
+
+        // Partition controls (Explore)
+        document.querySelectorAll('.partition-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (S.animating) return;
+                document.querySelectorAll('.partition-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+
+                const newPartition = e.target.dataset.partition;
+                if (newPartition !== S.partition) {
+                    S.animating = true;
+                    animatePartition(S.partition, newPartition);
+                    S.partition = newPartition;
+                    S.shaded = [];
+                    updateFractionLabel();
+                    setTimeout(() => { S.animating = false; }, 600);
+                }
+            });
+        });
+
+        // Insight buttons
+        document.querySelectorAll('.insight-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (S.animating) return;
+                S.animating = true;
+                animateInsight(e.target.dataset.insight);
+                setTimeout(() => { S.animating = false; }, 1000);
+            });
+        });
+
+        function animatePartition(from, to) {
+            // Simple animation: fade transition
+            const svg = S.shape === 'circle' ? renderCircle : renderRectangle;
+            setTimeout(() => svg(S.shaded), 300);
+        }
+
+        function animateInsight(type) {
+            if (type === 'halves') {
+                S.shaded = [0, 1];
+                updateFractionLabel();
+                render();
+                showFeedback('2 halves = 1 whole!');
+            } else if (type === 'fourths') {
+                S.shaded = [0, 1, 2, 3];
+                updateFractionLabel();
+                render();
+                showFeedback('4 fourths = 1 whole!');
+            } else if (type === 'equivalence') {
+                if (S.partition !== 'fourths') {
+                    document.querySelector('[data-partition="fourths"]').click();
+                }
+                S.shaded = [0, 1];
+                updateFractionLabel();
+                render();
+                showFeedback('2 fourths = 1 half!');
+            }
+        }
+
+        function render() {
+            if (S.shape === 'circle') renderCircle(S.shaded);
+            else renderRectangle(S.shaded);
+        }
+
+        // PRACTICE MODE
+        function initPractice() {
+            S.practiceLevel = 'emergent';
+            S.practiceType = Math.random() > 0.5 ? 'parts-count' : 'shade-half';
+
+            generatePracticeQuestion();
+        }
+
+        function generatePracticeQuestion() {
+            const q = S.practiceType;
+            const shape = 'circle';
+            const isCircle = true;
+
+            if (q === 'parts-count') {
+                const partition = Math.random() > 0.5 ? 'halves' : 'fourths';
+                document.getElementById('practice-q').textContent = 'How many equal parts?';
+
+                renderPracticeShape(shape, partition, []);
+
+                const choices = partition === 'halves' ? [2, 3, 4] : [2, 3, 4];
+                const correct = partition === 'halves' ? 2 : 4;
+
+                renderPracticeChoices(choices, correct);
+            } else if (q === 'shade-half') {
+                document.getElementById('practice-q').textContent = 'Shade one half';
+
+                const partition = 'halves';
+                renderPracticeShape(shape, partition, []);
+
+                const pieces = [0, 1];
+                renderShadingChoices(pieces);
+            }
+        }
+
+        function renderPracticeShape(shape, partition, shaded) {
+            const svg = document.getElementById('practice-svg');
+            svg.innerHTML = '';
+
+            const cx = 150, cy = 150, r = 100;
+
+            if (partition === 'halves') {
+                const path1 = createSVGElement('path', {
+                    d: `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} L ${cx + r} ${cy} Q ${cx} ${cy + r} ${cx - r} ${cy}`,
+                    fill: shaded.includes(0) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 0
+                });
+                svg.appendChild(path1);
+
+                const path2 = createSVGElement('path', {
+                    d: `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy} L ${cx + r} ${cy} Q ${cx} ${cy + r} ${cx - r} ${cy}`,
+                    fill: shaded.includes(1) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2,
+                    class: 'shape-piece',
+                    'data-id': 1
+                });
+                svg.appendChild(path2);
+
+                const line = createSVGElement('line', {
+                    x1: cx - r, y1: cy, x2: cx + r, y2: cy,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                svg.appendChild(line);
+            } else if (partition === 'fourths') {
+                const positions = [
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} L ${cx} ${cy}`, id: 0 },
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy} L ${cx} ${cy}`, id: 1 },
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 0 ${cx - r} ${cy} L ${cx} ${cy}`, id: 2 },
+                    { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${cx - r} ${cy} L ${cx} ${cy}`, id: 3 }
+                ];
+
+                positions.forEach(pos => {
+                    const path = createSVGElement('path', {
+                        d: pos.d,
+                        fill: shaded.includes(pos.id) ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2,
+                        class: 'shape-piece',
+                        'data-id': pos.id
+                    });
+                    svg.appendChild(path);
+                });
+
+                const hline = createSVGElement('line', {
+                    x1: cx - r, y1: cy, x2: cx + r, y2: cy,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                const vline = createSVGElement('line', {
+                    x1: cx, y1: cy - r, x2: cx, y2: cy + r,
+                    stroke: 'var(--cyan)',
+                    'stroke-width': 2
+                });
+                svg.appendChild(hline);
+                svg.appendChild(vline);
+            }
+        }
+
+        function renderPracticeChoices(choices, correct) {
+            const choicesDiv = document.getElementById('practice-choices');
+            choicesDiv.innerHTML = '';
+
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choice;
+                btn.addEventListener('click', () => {
+                    if (choice === correct) {
+                        showFB('✓ Correct!','correct');
+                        btn.classList.add('correct');
+                        showFeedback('Correct!');
+                        setTimeout(() => generatePracticeQuestion(), 1500);
+                    } else {
+                        showFB('Try again!','incorrect');
+                        btn.classList.add('incorrect');
+                    }
+                });
+                choicesDiv.appendChild(btn);
+            });
+        }
+
+        function renderShadingChoices(pieces) {
+            const choicesDiv = document.getElementById('practice-choices');
+            choicesDiv.innerHTML = '';
+
+            pieces.forEach(id => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.style.width = '80px';
+                btn.innerHTML = `<span style="font-size: 12px; color: var(--text2);">Part ${id + 1}</span>`;
+                btn.addEventListener('click', () => {
+                    const shaded = [id];
+                    renderPracticeShape('circle', 'halves', shaded);
+
+                    // Check if correct (any single half is "one half")
+                    showFB('✓ Correct!','correct');
+                    btn.classList.add('correct');
+                    showFeedback('Correct!');
+                    setTimeout(() => generatePracticeQuestion(), 1500);
+                });
+                choicesDiv.appendChild(btn);
+            });
+        }
+
+        // PLAY MODE
+        function initPlay() {
+            S.playScore = 0;
+            S.playStreak = 0;
+            S.playTimeLeft = 8;
+            S.playAnswered = false;
+            document.getElementById('play-score').textContent = '0';
+            document.getElementById('play-streak').textContent = '0';
+
+            generatePlayQuestion();
+        }
+
+        function generatePlayQuestion() {
+            const shapes = ['circle', 'rectangle'];
+            const partitions = ['halves', 'fourths'];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const partition = partitions[Math.floor(Math.random() * partitions.length)];
+            const total = partition === 'halves' ? 2 : 4;
+            const shaded = Math.floor(Math.random() * (total + 1));
+
+            S.playQuestion = { shape, partition, shaded, total };
+            S.playAnswered = false;
+            S.playTimeLeft = 8;
+
+            renderPlayShape();
+            renderPlayAnswers();
+            startPlayTimer();
+        }
+
+        function renderPlayShape() {
+            const svg = document.getElementById('play-svg');
+            svg.innerHTML = '';
+
+            const { shape, partition, shaded } = S.playQuestion;
+            const cx = 150, cy = 150, r = 100;
+
+            if (shape === 'circle') {
+                if (partition === 'halves') {
+                    const path1 = createSVGElement('path', {
+                        d: `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} L ${cx + r} ${cy} Q ${cx} ${cy + r} ${cx - r} ${cy}`,
+                        fill: shaded > 0 ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(path1);
+
+                    const path2 = createSVGElement('path', {
+                        d: `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy} L ${cx + r} ${cy} Q ${cx} ${cy + r} ${cx - r} ${cy}`,
+                        fill: shaded > 1 ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(path2);
+
+                    const line = createSVGElement('line', {
+                        x1: cx - r, y1: cy, x2: cx + r, y2: cy,
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(line);
+                } else {
+                    const positions = [
+                        { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} L ${cx} ${cy}`, id: 0 },
+                        { d: `M ${cx} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy} L ${cx} ${cy}`, id: 1 },
+                        { d: `M ${cx} ${cy} A ${r} ${r} 0 0 0 ${cx - r} ${cy} L ${cx} ${cy}`, id: 2 },
+                        { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${cx - r} ${cy} L ${cx} ${cy}`, id: 3 }
+                    ];
+
+                    positions.forEach((pos, idx) => {
+                        const path = createSVGElement('path', {
+                            d: pos.d,
+                            fill: idx < shaded ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                            stroke: 'var(--cyan)',
+                            'stroke-width': 2
+                        });
+                        svg.appendChild(path);
+                    });
+
+                    const hline = createSVGElement('line', {
+                        x1: cx - r, y1: cy, x2: cx + r, y2: cy,
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    const vline = createSVGElement('line', {
+                        x1: cx, y1: cy - r, x2: cx, y2: cy + r,
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(hline);
+                    svg.appendChild(vline);
+                }
+            } else {
+                const x = 50, y = 50, w = 200, h = 200;
+
+                if (partition === 'halves') {
+                    const rect1 = createSVGElement('rect', {
+                        x, y, width: w / 2, height: h,
+                        fill: shaded > 0 ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(rect1);
+
+                    const rect2 = createSVGElement('rect', {
+                        x: x + w / 2, y, width: w / 2, height: h,
+                        fill: shaded > 1 ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(rect2);
+
+                    const line = createSVGElement('line', {
+                        x1: x + w / 2, y1: y, x2: x + w / 2, y2: y + h,
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(line);
+                } else {
+                    const positions = [
+                        { x, y, width: w / 2, height: h / 2, id: 0 },
+                        { x: x + w / 2, y, width: w / 2, height: h / 2, id: 1 },
+                        { x, y: y + h / 2, width: w / 2, height: h / 2, id: 2 },
+                        { x: x + w / 2, y: y + h / 2, width: w / 2, height: h / 2, id: 3 }
+                    ];
+
+                    positions.forEach((pos, idx) => {
+                        const rect = createSVGElement('rect', {
+                            x: pos.x, y: pos.y, width: pos.width, height: pos.height,
+                            fill: idx < shaded ? 'rgba(0, 212, 255, 0.4)' : 'rgba(26, 34, 54, 0.8)',
+                            stroke: 'var(--cyan)',
+                            'stroke-width': 2
+                        });
+                        svg.appendChild(rect);
+                    });
+
+                    const hline = createSVGElement('line', {
+                        x1: x, y1: y + h / 2, x2: x + w, y2: y + h / 2,
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    const vline = createSVGElement('line', {
+                        x1: x + w / 2, y1: y, x2: x + w / 2, y2: y + h,
+                        stroke: 'var(--cyan)',
+                        'stroke-width': 2
+                    });
+                    svg.appendChild(hline);
+                    svg.appendChild(vline);
+                }
+            }
+        }
+
+        function renderPlayAnswers() {
+            const answersDiv = document.getElementById('play-answers');
+            answersDiv.innerHTML = '';
+
+            const { shaded, total } = S.playQuestion;
+            const fractions = total === 2
+                ? ['1/2', '2/2', '0/2']
+                : ['1/4', '2/4', '3/4', '4/4'];
+
+            const shuffled = fractions.sort(() => Math.random() - 0.5);
+            const correct = `${shaded}/${total}`;
+
+            shuffled.forEach(frac => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = frac;
+                btn.addEventListener('click', () => {
+                    if (S.playAnswered) return;
+                    S.playAnswered = true;
+
+                    if (frac === correct) {
+                        showFB('✓ Correct!','correct');
+                        btn.classList.add('correct');
+                        S.playScore++;
+                        S.playStreak++;
+                        document.getElementById('play-score').textContent = S.playScore;
+                        document.getElementById('play-streak').textContent = S.playStreak;
+                        showFeedback('Correct!');
+                    } else {
+                        showFB('Try again!','incorrect');
+                        btn.classList.add('incorrect');
+                        S.playStreak = 0;
+                        document.getElementById('play-streak').textContent = '0';
+                    }
+
+                    clearInterval(S.playTimer);
+                    setTimeout(() => generatePlayQuestion(), 1500);
+                });
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function startPlayTimer() {
+            const timerEl = document.getElementById('play-timer');
+            let time = 8;
+
+            S.playTimer = setInterval(() => {
+                time--;
+                timerEl.textContent = time + 's';
+
+                if (time <= 3) {
+                    timerEl.classList.add('warning');
+                } else {
+                    timerEl.classList.remove('warning');
+                }
+
+                if (time <= 0) {
+                    clearInterval(S.playTimer);
+                    if (!S.playAnswered) {
+                        S.playStreak = 0;
+                        document.getElementById('play-streak').textContent = '0';
+                        showFeedback('Time up!');
+                        setTimeout(() => generatePlayQuestion(), 1500);
+                    }
+                }
+            }, 1000);
+        }
+
+        function showFeedback(msg) {
+            const feedback = document.createElement('div');
+            feedback.className = 'feedback';
+            feedback.textContent = msg;
+            document.body.appendChild(feedback);
+
+            setTimeout(() => feedback.remove(), 1200);
+        }
+
+        // Initialize
+        render();
+    </script>
+<script src="../../vinculum-core.js"></script>
+<!-- Foundation loaded from vinculum-core.js -->
+</body>
+</html>

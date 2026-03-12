@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VINCULUM — Shape Builder</title>
+<link rel="stylesheet" href="../../vinculum-core.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Theme system loaded from vinculum-core.css */
+/* ═══ ACCESSIBILITY ═══ */
+.vinculum-rtm-btn {
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:8px;
+  border:1px solid var(--border);background:var(--card);
+  color:var(--text2);font-size:11px;font-weight:600;
+  font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.2s;
+}
+.vinculum-rtm-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+*:focus-visible { outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+
+/* ═══ LAYOUT ═══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none;}
+
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.back-btn{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:13px;font-family:inherit;cursor:pointer;text-decoration:none;}
+.back-btn:hover{background:var(--card);color:var(--cyan);}
+.header-title{font-size:18px;font-weight:800;}
+.header-title span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.header-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.2);letter-spacing:1px;}
+.std-tags{display:flex;gap:6px;}
+.std-tag{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;padding:3px 8px;border-radius:5px;background:rgba(0,212,255,0.08);color:var(--cyan);}
+.std-tag.mn{background:rgba(255,145,0,0.08);color:var(--orange);}
+
+.mode-tabs{display:flex;gap:4px;padding:8px 24px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;}
+.mode-tab{padding:8px 20px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;}
+.mode-tab:hover{color:var(--text2);background:var(--card);}
+.mode-tab.active-explore{background:rgba(0,212,255,0.1);color:var(--cyan);border-color:rgba(0,212,255,0.3);}
+.mode-tab.active-practice{background:rgba(0,230,118,0.1);color:var(--green);border-color:rgba(0,230,118,0.3);}
+.mode-tab.active-play{background:rgba(255,59,139,0.1);color:var(--pink);border-color:rgba(255,59,139,0.3);}
+.diff-selector{margin-left:auto;display:flex;gap:4px;align-items:center;}
+.diff-label{font-size:11px;color:var(--muted);margin-right:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.diff-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s;}
+.diff-btn.active{background:rgba(0,212,255,0.1);color:var(--cyan);border-color:rgba(0,212,255,0.3);}
+
+.main{flex:1;display:flex;overflow:hidden;}
+.workspace{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:14px;overflow-y:auto;}
+.side-panel{width:280px;background:var(--bg2);border-left:1px solid var(--border);padding:20px;overflow-y:auto;flex-shrink:0;}
+.panel-section{margin-bottom:20px;}
+.panel-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;}
+.panel-text{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* ── Build Grid ── */
+.build-area{position:relative;display:inline-block;}
+.build-grid{display:grid;gap:3px;padding:3px;background:var(--card);border:2px solid var(--border);border-radius:16px;}
+.grid-cell{
+  border-radius:8px;
+  background:var(--bg2);
+  border:2px solid transparent;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.grid-cell:hover{background:var(--card2);border-color:var(--border);}
+.grid-cell.target{
+  background:var(--bg);
+  border:2px dashed var(--cyan);
+  border-color:color-mix(in srgb, var(--cyan) 50%, transparent);
+}
+.grid-cell.target:hover{
+  border-color:var(--cyan);
+  background:color-mix(in srgb, var(--cyan) 8%, var(--bg));
+}
+.grid-cell.target.hover-preview{
+  border-color:var(--cyan);
+  background:color-mix(in srgb, var(--cyan) 15%, var(--bg));
+}
+.grid-cell.filled{
+  border:2px solid var(--cell-color, var(--cyan));
+  background:color-mix(in srgb, var(--cell-color, var(--cyan)) 20%, var(--bg));
+  cursor:default;
+  animation:cellPop 0.3s ease;
+}
+.grid-cell.filled .cell-shape{
+  width:60%;height:60%;
+  border-radius:4px;
+  background:var(--cell-color, var(--cyan));
+  opacity:0.6;
+}
+.grid-cell.outside{
+  background:var(--bg);
+  opacity:0.3;
+  cursor:not-allowed;
+}
+@keyframes cellPop {
+  0%{transform:scale(0.5);opacity:0;}
+  60%{transform:scale(1.15);}
+  100%{transform:scale(1);opacity:1;}
+}
+@keyframes completePulse {
+  0%{box-shadow:0 0 0 0 rgba(0,230,118,0.5);}
+  70%{box-shadow:0 0 0 20px rgba(0,230,118,0);}
+  100%{box-shadow:0 0 0 0 rgba(0,230,118,0);}
+}
+.build-grid.complete{
+  border-color:var(--green);
+  animation:completePulse 0.8s ease;
+}
+
+/* ── Piece Tray ── */
+.piece-tray{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:600px;}
+.piece-card{
+  background:var(--card);border:2px solid var(--border);border-radius:14px;
+  padding:8px 14px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;transition:all 0.2s;min-width:80px;
+}
+.piece-card:hover{border-color:var(--cyan);transform:translateY(-2px);}
+.piece-card.selected{border-color:var(--cyan);background:color-mix(in srgb, var(--cyan) 8%, var(--card));box-shadow:0 0 20px var(--glow);}
+.piece-card.used{opacity:0.3;pointer-events:none;border-style:dashed;}
+.piece-preview{display:grid;gap:2px;}
+.piece-preview-cell{border-radius:3px;width:18px;height:18px;}
+.piece-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.piece-card.selected .piece-name{color:var(--cyan);}
+
+/* ── Instruction ── */
+.instruction-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 28px;text-align:center;font-size:16px;color:var(--text2);font-weight:500;max-width:600px;}
+.instruction-box strong{color:var(--cyan);}
+
+/* ── Controls ── */
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.ctrl-btn{padding:10px 20px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
+.ctrl-btn:hover{background:var(--card2);color:var(--text);}
+
+/* ── Score ── */
+.score-display{text-align:center;padding:16px;background:var(--card);border-radius:12px;margin-bottom:12px;}
+.score-value{font-size:36px;font-weight:900;font-family:'JetBrains Mono',monospace;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.score-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+/* ── Explore Canvas ── */
+.canvas-area{position:relative;display:inline-block;}
+.canvas-grid{display:grid;gap:2px;padding:4px;background:var(--card);border:2px solid var(--border);border-radius:16px;}
+.canvas-cell{
+  width:55px;height:55px;border-radius:6px;background:var(--bg2);
+  border:1px solid var(--border);cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.canvas-cell:hover{background:var(--card2);border-color:var(--cyan);}
+.canvas-cell.has-shape{cursor:pointer;}
+.canvas-cell .shape-fill{width:80%;height:80%;border-radius:4px;opacity:0.7;}
+
+/* ── Feedback ── */
+.feedback{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);padding:24px 48px;border-radius:20px;font-size:28px;font-weight:800;z-index:200;pointer-events:none;transition:transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275),opacity 0.3s;opacity:0;}
+.feedback.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
+.feedback.correct{background:rgba(0,230,118,0.15);color:var(--green);border:2px solid var(--green);}
+.feedback.incorrect{background:rgba(255,59,139,0.15);color:var(--pink);border:2px solid var(--pink);}
+.feedback.try-again{background:rgba(255,193,7,0.15);color:var(--yellow);border:2px solid var(--yellow);}
+
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <a class="back-btn" href="../../index.html">&#9664; Hub</a>
+    <div class="header-title"><span>VINCULUM</span> Shape Builder</div>
+    <span class="header-badge">K.G</span>
+  </div>
+  <div class="std-tags">
+    <span class="std-tag">K.G.5</span>
+    <span class="std-tag">K.G.6</span>
+    <span class="std-tag mn">MN K.3.1.2</span>
+  </div>
+</div>
+
+<div class="mode-tabs">
+  <button class="mode-tab active-explore" id="tabExplore" onclick="setMode('explore')"><svg width="18" height="18" viewBox="0 0 48 48" fill="none"><path d="M4 24C4 24 12 12 24 12C36 12 44 24 44 24C44 24 36 36 24 36C12 36 4 24 4 24Z" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="24" cy="24" r="7" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="24" cy="24" r="3" fill="currentColor"/></svg> Explore</button>
+  <button class="mode-tab" id="tabPractice" onclick="setMode('practice')"><svg width="18" height="18" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="3" fill="none" opacity="0.3"/><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="126" stroke-dashoffset="32" stroke-linecap="round"/><polyline points="16,24 22,32 34,16" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Practice</button>
+  <button class="mode-tab" id="tabPlay" onclick="setMode('play')"><svg width="18" height="18" viewBox="0 0 48 48" fill="none"><polygon points="28,4 12,28 22,28 18,44 36,18 26,18" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><polygon points="27,8 15,27 23,27 20,40 34,19 26,19" fill="currentColor" opacity="0.15"/></svg> Play</button>
+  <div class="diff-selector">
+    <span class="diff-label">Level</span>
+    <button class="diff-btn active" id="diffS" onclick="setDiff('simple')">Simple</button>
+    <button class="diff-btn" id="diffC" onclick="setDiff('combine')">Combine</button>
+    <button class="diff-btn" id="diffP" onclick="setDiff('puzzles')">Puzzles</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="workspace" role="main" id="workspace"></div>
+  <div class="side-panel" id="sidePanel"></div>
+</div>
+<div class="feedback" id="feedback"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   VINCULUM — Shape Builder — K.G.5, K.G.6
+   Compose simple shapes to form larger shapes
+   ════════════════════════════════════════════════════════════ */
+
+/* ═══ SHAPE PIECE DEFINITIONS ═══
+   Each piece is defined by the cells it occupies relative to its anchor (top-left).
+   cells: array of [col, row] offsets from anchor
+   For example, an L-shape [[0,0],[0,1],[0,2],[1,2]] occupies:
+     X .
+     X .
+     X X
+*/
+
+const PIECE_DEFS = {
+  // 1-cell
+  square1: {
+    name: 'Square', cells: [[0,0]],
+    color: '#00d4ff', w: 1, h: 1
+  },
+  // 2-cell horizontal
+  domH: {
+    name: 'Wide Brick', cells: [[0,0],[1,0]],
+    color: '#ff3b8b', w: 2, h: 1
+  },
+  // 2-cell vertical
+  domV: {
+    name: 'Tall Brick', cells: [[0,0],[0,1]],
+    color: '#00e676', w: 1, h: 2
+  },
+  // 2×2 square
+  square4: {
+    name: 'Big Square', cells: [[0,0],[1,0],[0,1],[1,1]],
+    color: '#b388ff', w: 2, h: 2
+  },
+  // 3-cell horizontal bar
+  bar3: {
+    name: 'Long Bar', cells: [[0,0],[1,0],[2,0]],
+    color: '#ffc107', w: 3, h: 1
+  },
+  // L-shape (2 tall + 1 right at bottom)
+  lShape: {
+    name: 'L-Shape', cells: [[0,0],[0,1],[1,1]],
+    color: '#ff9100', w: 2, h: 2
+  },
+  // T-shape (3 wide + 1 below center)
+  tShape: {
+    name: 'T-Shape', cells: [[0,0],[1,0],[2,0],[1,1]],
+    color: '#e040fb', w: 3, h: 2
+  },
+};
+
+/* ═══ PUZZLE DEFINITIONS ═══
+   Each puzzle defines:
+   - name: what the kid is building
+   - gridW, gridH: exact grid dimensions (no wasted space!)
+   - target: which cells are part of the shape (all cells by default)
+   - pieces: which pieces to give the student
+   - hint: plain English help text
+   - teach: what concept this teaches
+*/
+
+const PUZZLES = {
+  simple: [
+    {
+      name: 'Rectangle', gridW: 2, gridH: 1,
+      pieces: ['square1','square1'],
+      hint: 'Put 2 squares side by side!',
+      teach: '2 squares make a rectangle'
+    },
+    {
+      name: 'Tall Rectangle', gridW: 1, gridH: 2,
+      pieces: ['square1','square1'],
+      hint: 'Stack 2 squares on top of each other!',
+      teach: '2 squares stacked make a tall rectangle'
+    },
+    {
+      name: 'Big Square', gridW: 2, gridH: 2,
+      pieces: ['square1','square1','square1','square1'],
+      hint: 'Fill all 4 spaces with small squares!',
+      teach: '4 small squares make 1 big square'
+    },
+    {
+      name: 'Long Bar', gridW: 3, gridH: 1,
+      pieces: ['square1','square1','square1'],
+      hint: 'Line up 3 squares in a row!',
+      teach: '3 squares in a row make a long shape'
+    },
+    {
+      name: 'Square from Bricks', gridW: 2, gridH: 2,
+      pieces: ['domH','domH'],
+      hint: 'Stack 2 wide bricks!',
+      teach: '2 rectangles can make a square'
+    },
+    {
+      name: 'Tall Tower', gridW: 1, gridH: 3,
+      pieces: ['square1','square1','square1'],
+      hint: 'Stack 3 squares into a tower!',
+      teach: 'Stacking squares makes a tall rectangle'
+    },
+  ],
+  combine: [
+    {
+      name: 'Rectangle', gridW: 3, gridH: 2,
+      pieces: ['domH','domH','domH'],
+      hint: 'Stack 3 wide bricks on top of each other!',
+      teach: 'Bricks stacked make bigger rectangles'
+    },
+    {
+      name: 'Big Rectangle', gridW: 4, gridH: 2,
+      pieces: ['square4','square4'],
+      hint: '2 big squares side by side!',
+      teach: '2 squares next to each other = rectangle'
+    },
+    {
+      name: 'Rectangle from Mix', gridW: 3, gridH: 2,
+      pieces: ['square4','domV','domV'],
+      hint: 'Put the big square on one side, tall bricks on the other!',
+      teach: 'Different shapes can combine to fill the same space'
+    },
+    {
+      name: 'Long Rectangle', gridW: 3, gridH: 2,
+      pieces: ['domV','domV','domV'],
+      hint: 'Stand 3 tall bricks side by side!',
+      teach: 'Tall bricks side by side make a wide rectangle'
+    },
+    {
+      name: 'Tall Rectangle', gridW: 2, gridH: 3,
+      pieces: ['domH','domH','domH'],
+      hint: 'Stack 3 wide bricks!',
+      teach: 'Wide bricks stacked make a tall rectangle'
+    },
+    {
+      name: 'Square Tower', gridW: 2, gridH: 4,
+      pieces: ['square4','square4'],
+      hint: 'Stack 2 big squares!',
+      teach: 'Big squares stacked = tall rectangle'
+    },
+  ],
+  puzzles: [
+    {
+      name: 'L-Shape', gridW: 2, gridH: 3,
+      target: [[0,0],[0,1],[0,2],[1,2]],
+      pieces: ['domV','domH'],
+      hint: 'Tall brick on the left, wide brick at the bottom!',
+      teach: 'An L-shape is a rectangle + a square on the corner'
+    },
+    {
+      name: 'T-Shape', gridW: 3, gridH: 2,
+      target: [[0,0],[1,0],[2,0],[1,1]],
+      pieces: ['bar3','square1'],
+      hint: 'Long bar on top, square underneath the middle!',
+      teach: 'A T-shape is a bar + a square below'
+    },
+    {
+      name: 'Plus Sign', gridW: 3, gridH: 3,
+      target: [[1,0],[0,1],[1,1],[2,1],[1,2]],
+      pieces: ['square1','square1','square1','square1','square1'],
+      hint: '1 in the middle, then 1 on each side: top, bottom, left, right!',
+      teach: '5 squares can make a plus/cross shape'
+    },
+    {
+      name: 'Stairs', gridW: 3, gridH: 3,
+      target: [[0,2],[1,1],[1,2],[2,0],[2,1],[2,2]],
+      pieces: ['square1','domV','bar3'],
+      hint: 'Think about steps going up from left to right!',
+      teach: 'Different pieces fit together like puzzle pieces'
+    },
+    {
+      name: 'U-Shape', gridW: 3, gridH: 2,
+      target: [[0,0],[0,1],[1,1],[2,1],[2,0]],
+      pieces: ['domV','square1','domV'],
+      hint: 'Tall bricks on the sides, square at the bottom middle!',
+      teach: 'A U-shape has tall sides and a bottom connector'
+    },
+    {
+      name: 'Z-Shape', gridW: 3, gridH: 3,
+      target: [[0,0],[1,0],[1,1],[1,2],[2,2]],
+      pieces: ['domH','square1','domH'],
+      hint: 'Wide brick at top-left, square in middle, wide brick at bottom-right!',
+      teach: 'A Z-shape zigzags diagonally'
+    },
+  ]
+};
+
+/* ═══ STATE ═══ */
+let S = {
+  mode: 'explore',
+  diff: 'simple',
+  // Explore state
+  exGrid: null,        // 2D array [row][col], null or {color}
+  exGridW: 6, exGridH: 6,
+  exSelected: 'square1',
+  exPlaced: 0,
+  // Practice state
+  puzzle: null,
+  puzzleIdx: 0,
+  prGrid: null,
+  prPieces: [],        // remaining piece IDs
+  prSelected: null,
+  prHover: null,       // {gx, gy} of currently hovered cell
+  // Play state
+  score: 0, round: 0, total: 8, streak: 0, best: 0,
+  plPuzzle: null, plGrid: null, plPieces: [], plSelected: null,
+  plHover: null, plStartTime: 0,
+};
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=rand(0,i);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function showFB(t,c){const f=document.getElementById('feedback');f.textContent=t;f.className='feedback '+c+' show';setTimeout(()=>f.classList.remove('show'),1200);}
+
+/* ═══ MODE & DIFFICULTY ═══ */
+function setMode(m){
+  S.mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t=>t.className='mode-tab');
+  document.getElementById('tab'+m.charAt(0).toUpperCase()+m.slice(1)).className='mode-tab active-'+m;
+  if(m==='explore') initExplore();
+  if(m==='practice'){ S.puzzleIdx=0; initPractice(); }
+  if(m==='play'){ S.round=0; S.score=0; S.streak=0; }
+  render();
+}
+function setDiff(d){
+  S.diff = d;
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('diff'+d.charAt(0).toUpperCase()).classList.add('active');
+  if(S.mode==='explore') initExplore();
+  if(S.mode==='practice'){ S.puzzleIdx=0; initPractice(); }
+  if(S.mode==='play'){ S.round=0; S.score=0; S.streak=0; }
+  render();
+}
+
+/* ═══ GRID HELPERS ═══ */
+function makeGrid(w, h){ return Array(h).fill(null).map(()=>Array(w).fill(null)); }
+
+// Get target cells for a puzzle. If puzzle.target is defined, use it.
+// Otherwise, all cells in the grid are target cells.
+function getTargetCells(puzzle){
+  if(puzzle.target) return puzzle.target;
+  const cells = [];
+  for(let y=0; y<puzzle.gridH; y++)
+    for(let x=0; x<puzzle.gridW; x++)
+      cells.push([x,y]);
+  return cells;
+}
+
+// Check if piece can be placed at (gx, gy) in grid
+function canPlace(piece, gx, gy, grid, gridW, gridH, targetCells){
+  return piece.cells.every(([dx,dy])=>{
+    const nx = gx+dx, ny = gy+dy;
+    if(nx<0||nx>=gridW||ny<0||ny>=gridH) return false;
+    if(grid[ny][nx]) return false;
+    if(targetCells){
+      return targetCells.some(([tx,ty])=> tx===nx && ty===ny);
+    }
+    return true;
+  });
+}
+
+// Place a piece
+function placePiece(piece, gx, gy, grid, color){
+  piece.cells.forEach(([dx,dy])=>{
+    grid[gy+dy][gx+dx] = { color };
+  });
+}
+
+// Check if all target cells are filled
+function isComplete(grid, targetCells){
+  return targetCells.every(([tx,ty])=> grid[ty][tx] !== null);
+}
+
+/* ═══ RENDER GRID (shared between modes) ═══ */
+function renderGrid(grid, gridW, gridH, targetCells, clickFn, hoverObj, selectedPiece){
+  const CELL_SIZE = Math.min(70, Math.floor(500 / Math.max(gridW, gridH)));
+
+  let html = `<div class="build-grid" id="buildGrid" style="grid-template-columns:repeat(${gridW}, ${CELL_SIZE}px); grid-template-rows:repeat(${gridH}, ${CELL_SIZE}px);">`;
+
+  // Determine which cells the selected piece would occupy at hover position
+  const hoverCells = new Set();
+  if(hoverObj && selectedPiece){
+    const piece = PIECE_DEFS[selectedPiece];
+    if(piece && canPlace(piece, hoverObj.gx, hoverObj.gy, grid, gridW, gridH, targetCells)){
+      piece.cells.forEach(([dx,dy])=>{
+        hoverCells.add(`${hoverObj.gx+dx},${hoverObj.gy+dy}`);
+      });
+    }
+  }
+
+  for(let y=0; y<gridH; y++){
+    for(let x=0; x<gridW; x++){
+      const cell = grid[y][x];
+      const isTarget = !targetCells || targetCells.some(([tx,ty])=> tx===x && ty===y);
+      const isHover = hoverCells.has(`${x},${y}`);
+
+      if(cell){
+        // Filled cell
+        html += `<div class="grid-cell filled" style="--cell-color:${cell.color}; width:${CELL_SIZE}px;height:${CELL_SIZE}px;">`;
+        html += '<div class="cell-shape"></div>';
+        html += '</div>';
+      } else if(!isTarget && targetCells){
+        // Outside target area
+        html += `<div class="grid-cell outside" style="width:${CELL_SIZE}px;height:${CELL_SIZE}px;"></div>`;
+      } else {
+        // Empty target cell
+        html += `<div class="grid-cell target${isHover?' hover-preview':''}" `;
+        html += `style="width:${CELL_SIZE}px;height:${CELL_SIZE}px;" `;
+        html += `onclick="${clickFn}(${x},${y})" `;
+        html += `onmouseenter="setHover('${clickFn}',${x},${y})" `;
+        html += `onmouseleave="clearHover('${clickFn}')" `;
+        html += `>`;
+        if(isHover){
+          const piece = PIECE_DEFS[selectedPiece];
+          html += `<div class="cell-shape" style="background:${piece?.color || 'var(--cyan)'};opacity:0.3;width:60%;height:60%;border-radius:4px;"></div>`;
+        }
+        html += '</div>';
+      }
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+/* Hover management */
+function setHover(mode, gx, gy){
+  if(mode.includes('explore')){ S.exHover = {gx,gy}; }
+  else if(mode.includes('practice')){ S.prHover = {gx,gy}; }
+  else if(mode.includes('play')){ S.plHover = {gx,gy}; }
+  render();
+}
+function clearHover(mode){
+  if(mode.includes('explore')){ S.exHover = null; }
+  else if(mode.includes('practice')){ S.prHover = null; }
+  else if(mode.includes('play')){ S.plHover = null; }
+  render();
+}
+
+/* ═══ PIECE TRAY RENDERER ═══ */
+function renderPieceTray(pieces, selectedId, clickPrefix){
+  // Count pieces
+  const counts = {};
+  pieces.forEach(pid=>{ counts[pid]=(counts[pid]||0)+1; });
+
+  let html = '<div class="piece-tray">';
+  const seen = new Set();
+  pieces.forEach(pid=>{
+    if(seen.has(pid)) return;
+    seen.add(pid);
+    const p = PIECE_DEFS[pid];
+    const count = counts[pid];
+    const sel = selectedId===pid;
+
+    html += `<div class="piece-card ${sel?'selected':''}" onclick="${clickPrefix}('${pid}')">`;
+    // Mini grid preview of piece shape
+    html += `<div class="piece-preview" style="grid-template-columns:repeat(${p.w},18px);grid-template-rows:repeat(${p.h},18px);">`;
+    for(let py=0;py<p.h;py++){
+      for(let px=0;px<p.w;px++){
+        const occupied = p.cells.some(([cx,cy])=> cx===px && cy===py);
+        if(occupied){
+          html += `<div class="piece-preview-cell" style="background:${p.color};opacity:${sel?0.9:0.5};"></div>`;
+        } else {
+          html += `<div class="piece-preview-cell" style="background:transparent;"></div>`;
+        }
+      }
+    }
+    html += '</div>';
+    if(count > 1) html += `<div style="font-size:11px;font-weight:800;color:var(--cyan);">&times;${count}</div>`;
+    html += `<div class="piece-name">${p.name}</div>`;
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+
+/* ══════════════════════════════════════════
+   EXPLORE — free build on a 6×6 canvas
+   ══════════════════════════════════════════ */
+
+function initExplore(){
+  S.exGridW = S.diff==='simple'? 4 : S.diff==='combine'? 5 : 6;
+  S.exGridH = S.exGridW;
+  S.exGrid = makeGrid(S.exGridW, S.exGridH);
+  S.exPlaced = 0;
+  S.exSelected = 'square1';
+}
+
+function exPlace(gx, gy){
+  const piece = PIECE_DEFS[S.exSelected];
+  if(!piece) return;
+  if(!canPlace(piece, gx, gy, S.exGrid, S.exGridW, S.exGridH, null)){
+    showFB('Doesn\'t fit!','try-again'); return;
+  }
+  const colors = ['#00d4ff','#ff3b8b','#00e676','#b388ff','#ff9100','#ffc107','#e040fb'];
+  placePiece(piece, gx, gy, S.exGrid, colors[S.exPlaced % colors.length]);
+  S.exPlaced++;
+  S.exHover = null;
+  render();
+}
+function exSelect(pid){ S.exSelected = pid; render(); }
+
+function renderExplore(ws, sp){
+  if(!S.exGrid) initExplore();
+  const availPieces = S.diff==='simple'? ['square1','domH','domV'] :
+                      S.diff==='combine'? ['square1','square4','domH','domV','lShape'] :
+                      Object.keys(PIECE_DEFS);
+  let h = '';
+  h += '<div class="instruction-box">Pick a shape, then click the grid to place it. Build anything!</div>';
+  h += renderGrid(S.exGrid, S.exGridW, S.exGridH, null, 'exPlace', S.exHover, S.exSelected);
+  h += renderPieceTray(availPieces, S.exSelected, 'exSelect');
+  h += '<div class="controls">';
+  h += '<button class="ctrl-btn" onclick="initExplore();render();">&#8634; Clear All</button>';
+  h += '</div>';
+  ws.innerHTML = h;
+
+  const filled = S.exGrid.flat().filter(c=>c).length;
+  sp.innerHTML = `
+    <div class="panel-section"><div class="panel-title">How to Build</div>
+    <div class="panel-text">
+    1. Pick a shape from below the grid<br><br>
+    2. Hover over the grid to see where it goes<br><br>
+    3. Click to place it!<br><br>
+    Try making a house, a robot, or a pattern.</div></div>
+    <div class="panel-section"><div class="panel-title">Your Build</div>
+    <div class="panel-text" style="background:var(--card);padding:12px;border-radius:8px;">
+    <strong>${filled}</strong> cells filled<br>
+    <strong>${S.exPlaced}</strong> pieces placed</div></div>
+    <div class="panel-section"><div class="panel-title">Key Idea</div>
+    <div class="panel-text">Small shapes <strong>compose</strong> into bigger shapes!<br><br>
+    2 squares side by side = <strong>rectangle</strong><br><br>
+    4 squares in a box = <strong>big square</strong></div></div>`;
+}
+
+
+/* ══════════════════════════════════════════
+   PRACTICE — guided puzzle building
+   ══════════════════════════════════════════ */
+
+function initPractice(){
+  const pool = PUZZLES[S.diff] || PUZZLES.simple;
+  S.puzzle = pool[S.puzzleIdx % pool.length];
+  S.prGrid = makeGrid(S.puzzle.gridW, S.puzzle.gridH);
+  S.prPieces = [...S.puzzle.pieces];
+  S.prSelected = S.prPieces[0] || null;
+  S.prHover = null;
+}
+
+function prPlace(gx, gy){
+  if(!S.prSelected) return;
+  const piece = PIECE_DEFS[S.prSelected];
+  if(!piece) return;
+  const targetCells = getTargetCells(S.puzzle);
+
+  if(!canPlace(piece, gx, gy, S.prGrid, S.puzzle.gridW, S.puzzle.gridH, targetCells)){
+    showFB('Try another spot!','try-again');
+    return;
+  }
+
+  placePiece(piece, gx, gy, S.prGrid, piece.color);
+
+  // Remove one instance of used piece
+  const idx = S.prPieces.indexOf(S.prSelected);
+  if(idx >= 0) S.prPieces.splice(idx, 1);
+  S.prSelected = S.prPieces[0] || null;
+  S.prHover = null;
+
+  // Check completion
+  if(isComplete(S.prGrid, targetCells)){
+    showFB('You built a ' + S.puzzle.name + '!', 'correct');
+    setTimeout(()=>{
+      S.puzzleIdx++;
+      initPractice();
+      render();
+    }, 1500);
+  } else {
+    render();
+  }
+}
+function prSelect(pid){ S.prSelected = pid; render(); }
+
+function renderPractice(ws, sp){
+  if(!S.puzzle) initPractice();
+  const targetCells = getTargetCells(S.puzzle);
+
+  let h = '';
+  h += `<div class="instruction-box">Build the <strong>${S.puzzle.name}</strong> using the pieces below!</div>`;
+  h += renderGrid(S.prGrid, S.puzzle.gridW, S.puzzle.gridH, targetCells, 'prPlace', S.prHover, S.prSelected);
+  h += renderPieceTray(S.prPieces, S.prSelected, 'prSelect');
+  h += '<div class="controls">';
+  h += '<button class="ctrl-btn" onclick="initPractice();render();">&#8634; Reset</button>';
+  h += '<button class="ctrl-btn" onclick="S.puzzleIdx++;initPractice();render();" style="opacity:0.7;">Skip &#8594;</button>';
+  h += '</div>';
+  ws.innerHTML = h;
+
+  // Side panel
+  const remaining = S.prPieces.length;
+  const total = S.puzzle.pieces.length;
+  const placed = total - remaining;
+
+  sp.innerHTML = `
+    <div class="panel-section"><div class="panel-title">Puzzle: ${S.puzzle.name}</div>
+    <div class="panel-text" style="background:var(--card);padding:12px;border-radius:8px;">
+    ${S.puzzle.hint}<br><br>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+      <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;">
+        <div style="width:${total>0?Math.round(placed/total*100):0}%;height:100%;background:var(--green);border-radius:4px;transition:width 0.3s;"></div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:var(--green);">${placed}/${total}</span>
+    </div>
+    </div></div>
+    <div class="panel-section"><div class="panel-title">Steps</div>
+    <div class="panel-text">1. Select a piece from the tray<br><br>
+    2. Hover over the grid to preview<br><br>
+    3. Click to place it inside the outline<br><br>
+    4. Fill the shape to complete the puzzle!</div></div>
+    <div class="panel-section"><div class="panel-title">Learning</div>
+    <div class="panel-text" style="background:rgba(0,230,118,0.05);padding:12px;border-radius:8px;border:1px solid rgba(0,230,118,0.15);color:var(--green);">
+    ${S.puzzle.teach}</div></div>`;
+}
+
+
+/* ══════════════════════════════════════════
+   PLAY — timed puzzle game
+   ══════════════════════════════════════════ */
+
+function startGame(){
+  S.round = 1; S.score = 0; S.streak = 0;
+  loadPlayPuzzle();
+}
+
+function loadPlayPuzzle(){
+  const pool = S.diff==='simple'? PUZZLES.simple :
+               S.diff==='combine'? [...PUZZLES.simple,...PUZZLES.combine] :
+               [...PUZZLES.simple,...PUZZLES.combine,...PUZZLES.puzzles];
+  S.plPuzzle = pool[rand(0, pool.length-1)];
+  S.plGrid = makeGrid(S.plPuzzle.gridW, S.plPuzzle.gridH);
+  S.plPieces = [...S.plPuzzle.pieces];
+  S.plSelected = S.plPieces[0] || null;
+  S.plHover = null;
+  S.plStartTime = Date.now();
+}
+
+function plPlace(gx, gy){
+  if(!S.plSelected) return;
+  const piece = PIECE_DEFS[S.plSelected];
+  if(!piece) return;
+  const targetCells = getTargetCells(S.plPuzzle);
+
+  if(!canPlace(piece, gx, gy, S.plGrid, S.plPuzzle.gridW, S.plPuzzle.gridH, targetCells)) return;
+
+  placePiece(piece, gx, gy, S.plGrid, piece.color);
+  const idx = S.plPieces.indexOf(S.plSelected);
+  if(idx >= 0) S.plPieces.splice(idx, 1);
+  S.plSelected = S.plPieces[0] || null;
+  S.plHover = null;
+
+  if(isComplete(S.plGrid, targetCells)){
+    const elapsed = (Date.now() - S.plStartTime) / 1000;
+    const bonus = Math.max(0, Math.floor(15 - elapsed));
+    const pts = 10 + bonus + S.streak * 2;
+    S.score += pts;
+    S.streak++;
+    if(S.streak > S.best) S.best = S.streak;
+    showFB(S.plPuzzle.name + '! +' + pts, 'correct');
+    setTimeout(()=>{
+      if(S.round >= S.total){
+        showFB('Game Over! Score: ' + S.score, 'correct');
+        setTimeout(()=>{ S.round=0; render(); }, 2000);
+        return;
+      }
+      S.round++;
+      loadPlayPuzzle();
+      render();
+    }, 1200);
+  } else {
+    render();
+  }
+}
+function plSelect(pid){ S.plSelected = pid; render(); }
+
+function renderPlay(ws, sp){
+  if(S.round === 0) startGame();
+  const targetCells = getTargetCells(S.plPuzzle);
+
+  let h = '';
+  h += `<div style="font-size:12px;color:var(--muted);font-weight:600;">Round ${S.round} of ${S.total}</div>`;
+  h += `<div class="instruction-box">Build: <strong>${S.plPuzzle.name}</strong></div>`;
+  h += renderGrid(S.plGrid, S.plPuzzle.gridW, S.plPuzzle.gridH, targetCells, 'plPlace', S.plHover, S.plSelected);
+  h += renderPieceTray(S.plPieces, S.plSelected, 'plSelect');
+  ws.innerHTML = h;
+
+  sp.innerHTML = `
+    <div class="score-display"><div class="score-value">${S.score}</div><div class="score-label">Score</div></div>
+    <div class="score-display" style="background:transparent;padding:8px;">
+      <div style="font-size:18px;font-weight:700;color:var(--yellow);">${S.streak} streak</div>
+      <div class="score-label">In a row</div>
+    </div>
+    <div class="panel-section"><div class="panel-title">Hint</div>
+    <div class="panel-text">${S.plPuzzle.hint}</div></div>
+    <div class="panel-section"><div class="panel-title">Best Streak</div>
+    <div class="panel-text" style="font-size:24px;font-weight:800;color:var(--purple);">${S.best}</div></div>`;
+}
+
+
+/* ═══ MAIN RENDER ═══ */
+function render(){
+  const ws = document.getElementById('workspace');
+  const sp = document.getElementById('sidePanel');
+  if(S.mode==='explore') renderExplore(ws, sp);
+  else if(S.mode==='practice') renderPractice(ws, sp);
+  else renderPlay(ws, sp);
+}
+
+// Initialize
+initExplore();
+render();
+</script>
+<script src="../../vinculum-core.js"></script>
+<!-- Foundation loaded from vinculum-core.js -->
+</body>
+</html>

@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VINCULUM — Measurement Compare</title>
+    <link rel="stylesheet" href="../../vinculum-core.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .back-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text2);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .back-btn:hover {
+            background: var(--bg);
+            color: var(--cyan);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .header-title span {
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--cyan);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .std-tags {
+            display: flex;
+            gap: 8px;
+        }
+
+        .std-tag {
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: rgba(255, 105, 180, 0.1);
+            color: var(--pink);
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .mode-tabs {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .mode-tab {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .mode-tab:hover {
+            background: var(--bg);
+            color: var(--text2);
+        }
+
+        .mode-tab.active-explore,
+        .mode-tab.active-practice,
+        .mode-tab.active-play {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--cyan);
+        }
+
+        .diff-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .diff-btn:hover {
+            color: var(--text2);
+            background: var(--card);
+        }
+
+        .diff-btn.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--cyan);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .workspace {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* ============= EXPLORE MODE ============= */
+        .explore-section {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .explore-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .attribute-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .attr-btn {
+            padding: 12px 20px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text2);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .attr-btn:hover {
+            border-color: var(--text2);
+            background: var(--bg);
+        }
+
+        .attr-btn.active {
+            border-color: var(--cyan);
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--cyan);
+        }
+
+        .length-demo,
+        .weight-demo,
+        .capacity-demo {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 24px;
+            border-radius: 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 24px;
+            min-height: 200px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 212, 255, 0.05) 100%);
+            padding: 24px;
+            border-radius: 8px;
+        }
+
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .bar-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text2);
+        }
+
+        .bar {
+            width: 100%;
+            border-radius: 8px;
+            transition: height 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-a {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+        }
+
+        .bar-b {
+            background: linear-gradient(135deg, #ff69b4, #cc0066);
+        }
+
+        .bar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
+            pointer-events: none;
+        }
+
+        .bar-value {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--cyan);
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--cyan);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.5);
+        }
+
+        .comparison-text {
+            font-size: 16px;
+            font-weight: 700;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--cyan);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ============= BALANCE SCALE ============= */
+        .scale-demo {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 24px;
+            border-radius: 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+
+        .scale-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 280px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255, 105, 180, 0.05) 100%);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .scale-svg {
+            width: 100%;
+            max-width: 300px;
+            height: 280px;
+        }
+
+        .weight-control {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .weight-item {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .weight-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text2);
+        }
+
+        .weight-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        /* ============= CAPACITY DEMO ============= */
+        .capacity-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 40px;
+            min-height: 250px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255, 191, 0, 0.05) 100%);
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .cup-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cup {
+            width: 80px;
+            height: 120px;
+            border: 3px solid var(--text2);
+            border-radius: 0 0 8px 8px;
+            position: relative;
+            background: white;
+            overflow: hidden;
+        }
+
+        .cup-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(135deg, var(--yellow), #ffcc00);
+            transition: height 0.3s ease;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .cup-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text2);
+        }
+
+        .capacity-value {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ============= PRACTICE MODE ============= */
+        .practice-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .question-card {
+            padding: 24px;
+            border-radius: 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+
+        .question-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        .objects-display {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 24px;
+            min-height: 200px;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 212, 255, 0.05) 100%);
+            padding: 24px;
+            border-radius: 8px;
+        }
+
+        .object-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .object-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .answer-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .answer-buttons.three-col {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .answer-btn {
+            padding: 16px 20px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text2);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-transform: capitalize;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 212, 255, 0.05);
+            color: var(--cyan);
+        }
+
+        .answer-btn.selected {
+            border-color: var(--cyan);
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--cyan);
+        }
+
+        .answer-btn.correct {
+            border-color: var(--green);
+            background: rgba(0, 200, 100, 0.15);
+            color: var(--green);
+            animation: pulse-correct 0.5s ease;
+        }
+
+        .answer-btn.incorrect {
+            border-color: var(--orange);
+            background: rgba(255, 140, 0, 0.15);
+            color: var(--orange);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes pulse-correct {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .feedback {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text2);
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct-msg {
+            background: rgba(0, 200, 100, 0.1);
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .feedback.incorrect-msg {
+            background: rgba(255, 140, 0, 0.1);
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        .score-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: var(--bg);
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .score-display {
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .next-btn {
+            margin-top: 16px;
+            padding: 12px 20px;
+            border: 2px solid var(--cyan);
+            border-radius: 8px;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--cyan);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .next-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+        }
+
+        /* ============= PLAY MODE ============= */
+        .play-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .play-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-radius: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+
+        .timer-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .timer-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--cyan);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .timer-bar {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            overflow: hidden;
+        }
+
+        .timer-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--pink));
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        .streak-display {
+            text-align: center;
+        }
+
+        .streak-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .streak-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--yellow);
+        }
+
+        .play-card {
+            padding: 24px;
+            border-radius: 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .play-question {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .play-objects {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 40px;
+            min-height: 150px;
+            width: 100%;
+        }
+
+        .play-answer-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .play-answer-btn {
+            padding: 14px 20px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text2);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            text-transform: capitalize;
+        }
+
+        .play-answer-btn:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .play-answer-btn.correct {
+            border-color: var(--green);
+            background: rgba(0, 200, 100, 0.15);
+            color: var(--green);
+            animation: pulse-correct 0.4s ease;
+        }
+
+        .play-answer-btn.incorrect {
+            border-color: var(--orange);
+            background: rgba(255, 140, 0, 0.15);
+            color: var(--orange);
+        }
+
+        .game-over {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .game-over-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .final-score {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 8px;
+            font-size: 32px;
+            justify-content: center;
+        }
+
+        .restart-btn {
+            padding: 16px 32px;
+            border: 2px solid var(--cyan);
+            border-radius: 8px;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--cyan);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .restart-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 16px rgba(0, 212, 255, 0.4);
+        }
+
+        /* ============= UTILITIES ============= */
+        *:focus-visible {
+            outline: 2px solid var(--cyan);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-left {
+                flex-wrap: wrap;
+            }
+
+            .std-tags {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .mode-tabs {
+                justify-content: flex-start;
+            }
+
+            .bar-container,
+            .objects-display {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .answer-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .play-answer-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .capacity-container {
+                gap: 20px;
+            }
+
+            .weight-control {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='../../index.html'" aria-label="Back to Hub">← Hub</button>
+            <div class="header-title"><span>Measurement Compare</span></div>
+            <span class="header-badge">K</span>
+        </div>
+        <div class="std-tags">
+            <span class="std-tag">K.MD.1</span>
+            <span class="std-tag">K.MD.2</span>
+        </div>
+    </div>
+
+    <div class="mode-tabs">
+        <button class="mode-tab active-explore" onclick="switchMode('explore')">🔍 Explore</button>
+        <button class="mode-tab" onclick="switchMode('practice')">✏️ Practice</button>
+        <button class="mode-tab" onclick="switchMode('play')">🎮 Play</button>
+        <span style="flex:1"></span>
+        <button class="diff-btn active" data-diff="emergent" onclick="setDiff('emergent')">Emergent</button>
+        <button class="diff-btn" data-diff="proficient" onclick="setDiff('proficient')">Proficient</button>
+        <button class="diff-btn" data-diff="advanced" onclick="setDiff('advanced')">Advanced</button>
+    </div>
+
+    <div class="main">
+        <div class="workspace" id="workspace"></div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <script src="../../vinculum-core.js"></script>
+    <script>
+        // Standard feedback function
+        function showFB(text, className) {
+            const f = document.getElementById('feedback');
+            f.textContent = text;
+            f.className = 'feedback ' + className + ' show';
+            setTimeout(() => f.classList.remove('show'), 1200);
+        }
+    </script>
+    <script>
+        // ============= STATE MANAGEMENT =============
+        const state = {
+            mode: 'explore',
+            difficulty: 'emergent',
+            attribute: 'length',
+            score: 0,
+            total: 0,
+            timer: null,
+            timeLeft: 60,
+            streak: 0,
+            barAHeight: 60,
+            barBHeight: 100,
+            weightA: 30,
+            weightB: 70,
+            capacityA: 40,
+            capacityB: 75,
+            currentQuestion: null,
+            gameActive: false
+        };
+
+        // ============= MODE SWITCHING =============
+        function switchMode(mode) {
+            state.mode = mode;
+            state.streak = 0;
+            state.score = 0;
+            state.total = 0;
+
+            if (state.timer) clearInterval(state.timer);
+
+            document.querySelectorAll('.mode-tab').forEach(btn => {
+                btn.className = 'mode-tab';
+            });
+            document.querySelector(`button[onclick="switchMode('${mode}')"]`).classList.add(`active-${mode}`);
+
+            renderWorkspace();
+        }
+
+        function setDiff(diff) {
+            state.difficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-diff="${diff}"]`).classList.add('active');
+            renderWorkspace();
+        }
+
+        // ============= RENDER MAIN WORKSPACE =============
+        function renderWorkspace() {
+            const ws = document.getElementById('workspace');
+            ws.innerHTML = '';
+
+            if (state.mode === 'explore') {
+                renderExplore(ws);
+            } else if (state.mode === 'practice') {
+                renderPractice(ws);
+            } else if (state.mode === 'play') {
+                renderPlay(ws);
+            }
+        }
+
+        // ============= EXPLORE MODE =============
+        function renderExplore(container) {
+            const div = document.createElement('div');
+            div.className = 'explore-section';
+
+            const header = document.createElement('h2');
+            header.className = 'explore-header';
+            header.textContent = '📏 Measurement Playground';
+            div.appendChild(header);
+
+            // Attribute selector
+            const attrSelector = document.createElement('div');
+            attrSelector.className = 'attribute-selector';
+
+            const attrs = state.difficulty === 'emergent'
+                ? ['length']
+                : state.difficulty === 'proficient'
+                ? ['length', 'weight']
+                : ['length', 'weight', 'capacity'];
+
+            attrs.forEach(attr => {
+                const btn = document.createElement('button');
+                btn.className = `attr-btn ${state.attribute === attr ? 'active' : ''}`;
+                btn.textContent = attr.charAt(0).toUpperCase() + attr.slice(1);
+                btn.onclick = () => {
+                    state.attribute = attr;
+                    renderExplore(container);
+                };
+                attrSelector.appendChild(btn);
+            });
+
+            div.appendChild(attrSelector);
+
+            if (state.attribute === 'length') {
+                div.appendChild(createLengthDemo());
+            } else if (state.attribute === 'weight') {
+                div.appendChild(createWeightDemo());
+            } else if (state.attribute === 'capacity') {
+                div.appendChild(createCapacityDemo());
+            }
+
+            container.appendChild(div);
+        }
+
+        function createLengthDemo() {
+            const demo = document.createElement('div');
+            demo.className = 'length-demo';
+
+            const barContainer = document.createElement('div');
+            barContainer.className = 'bar-container';
+
+            // Bar A
+            const barItemA = document.createElement('div');
+            barItemA.className = 'bar-item';
+
+            const labelA = document.createElement('div');
+            labelA.className = 'bar-label';
+            labelA.textContent = 'Object A';
+            barItemA.appendChild(labelA);
+
+            const barA = document.createElement('div');
+            barA.className = 'bar bar-a';
+            barA.style.height = state.barAHeight + 'px';
+            barA.style.width = '80px';
+            barItemA.appendChild(barA);
+
+            const valueA = document.createElement('div');
+            valueA.className = 'bar-value';
+            valueA.textContent = state.barAHeight + ' units';
+            barItemA.appendChild(valueA);
+
+            barContainer.appendChild(barItemA);
+
+            // Bar B
+            const barItemB = document.createElement('div');
+            barItemB.className = 'bar-item';
+
+            const labelB = document.createElement('div');
+            labelB.className = 'bar-label';
+            labelB.textContent = 'Object B';
+            barItemB.appendChild(labelB);
+
+            const barB = document.createElement('div');
+            barB.className = 'bar bar-b';
+            barB.style.height = state.barBHeight + 'px';
+            barB.style.width = '80px';
+            barItemB.appendChild(barB);
+
+            const valueB = document.createElement('div');
+            valueB.className = 'bar-value';
+            valueB.textContent = state.barBHeight + ' units';
+            barItemB.appendChild(valueB);
+
+            barContainer.appendChild(barItemB);
+            demo.appendChild(barContainer);
+
+            // Sliders
+            const sliderContainer = document.createElement('div');
+            sliderContainer.style.display = 'flex';
+            sliderContainer.style.flexDirection = 'column';
+            sliderContainer.style.gap = '16px';
+
+            const sliderA = document.createElement('input');
+            sliderA.type = 'range';
+            sliderA.className = 'slider';
+            sliderA.min = '20';
+            sliderA.max = '140';
+            sliderA.value = state.barAHeight;
+            sliderA.addEventListener('input', (e) => {
+                state.barAHeight = parseInt(e.target.value);
+                renderExplore(document.getElementById('workspace').querySelector('.explore-section').parentElement);
+            });
+            sliderContainer.appendChild(sliderA);
+
+            const sliderB = document.createElement('input');
+            sliderB.type = 'range';
+            sliderB.className = 'slider';
+            sliderB.min = '20';
+            sliderB.max = '140';
+            sliderB.value = state.barBHeight;
+            sliderB.addEventListener('input', (e) => {
+                state.barBHeight = parseInt(e.target.value);
+                renderExplore(document.getElementById('workspace').querySelector('.explore-section').parentElement);
+            });
+            sliderContainer.appendChild(sliderB);
+
+            demo.appendChild(sliderContainer);
+
+            // Comparison text
+            const comparison = document.createElement('div');
+            comparison.className = 'comparison-text';
+
+            if (state.barAHeight > state.barBHeight) {
+                comparison.textContent = '📏 Object A is LONGER';
+            } else if (state.barBHeight > state.barAHeight) {
+                comparison.textContent = '📏 Object B is LONGER';
+            } else {
+                comparison.textContent = '📏 Both are the SAME LENGTH';
+            }
+
+            demo.appendChild(comparison);
+
+            return demo;
+        }
+
+        function createWeightDemo() {
+            const demo = document.createElement('div');
+            demo.className = 'weight-demo';
+
+            const scaleContainer = document.createElement('div');
+            scaleContainer.className = 'scale-container';
+
+            const svg = createBalanceScaleSVG(state.weightA, state.weightB);
+            svg.className = 'scale-svg';
+            scaleContainer.appendChild(svg);
+
+            demo.appendChild(scaleContainer);
+
+            // Weight controls
+            const controls = document.createElement('div');
+            controls.className = 'weight-control';
+
+            const itemA = document.createElement('div');
+            itemA.className = 'weight-item';
+
+            const labelA = document.createElement('div');
+            labelA.className = 'weight-label';
+            labelA.textContent = 'Object A Weight';
+            itemA.appendChild(labelA);
+
+            const valueA = document.createElement('div');
+            valueA.className = 'weight-value';
+            valueA.textContent = state.weightA;
+            itemA.appendChild(valueA);
+
+            const sliderA = document.createElement('input');
+            sliderA.type = 'range';
+            sliderA.className = 'slider';
+            sliderA.min = '10';
+            sliderA.max = '100';
+            sliderA.value = state.weightA;
+            sliderA.addEventListener('input', (e) => {
+                state.weightA = parseInt(e.target.value);
+                const ws = document.getElementById('workspace');
+                renderExplore(ws);
+            });
+            itemA.appendChild(sliderA);
+
+            controls.appendChild(itemA);
+
+            const itemB = document.createElement('div');
+            itemB.className = 'weight-item';
+
+            const labelB = document.createElement('div');
+            labelB.className = 'weight-label';
+            labelB.textContent = 'Object B Weight';
+            itemB.appendChild(labelB);
+
+            const valueB = document.createElement('div');
+            valueB.className = 'weight-value';
+            valueB.textContent = state.weightB;
+            itemB.appendChild(valueB);
+
+            const sliderB = document.createElement('input');
+            sliderB.type = 'range';
+            sliderB.className = 'slider';
+            sliderB.min = '10';
+            sliderB.max = '100';
+            sliderB.value = state.weightB;
+            sliderB.addEventListener('input', (e) => {
+                state.weightB = parseInt(e.target.value);
+                renderExplore(document.getElementById('workspace'));
+            });
+            itemB.appendChild(sliderB);
+
+            controls.appendChild(itemB);
+
+            demo.appendChild(controls);
+
+            // Comparison text
+            const comparison = document.createElement('div');
+            comparison.className = 'comparison-text';
+
+            if (state.weightA > state.weightB) {
+                comparison.textContent = '⚖️ Object A is HEAVIER';
+            } else if (state.weightB > state.weightA) {
+                comparison.textContent = '⚖️ Object B is HEAVIER';
+            } else {
+                comparison.textContent = '⚖️ Both weigh the SAME';
+            }
+
+            demo.appendChild(comparison);
+
+            return demo;
+        }
+
+        function createBalanceScaleSVG(weightA, weightB) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 300 280');
+            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+            // Stand
+            const stand = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            stand.setAttribute('x', '120');
+            stand.setAttribute('y', '220');
+            stand.setAttribute('width', '60');
+            stand.setAttribute('height', '50');
+            stand.setAttribute('fill', 'var(--card)');
+            stand.setAttribute('stroke', 'var(--border)');
+            stand.setAttribute('stroke-width', '2');
+            stand.setAttribute('rx', '4');
+            svg.appendChild(stand);
+
+            // Center pivot
+            const pivot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            pivot.setAttribute('cx', '150');
+            pivot.setAttribute('cy', '220');
+            pivot.setAttribute('r', '6');
+            pivot.setAttribute('fill', 'var(--text2)');
+            svg.appendChild(pivot);
+
+            // Calculate tilt based on weight difference
+            const diff = (weightB - weightA) / 50 * 15; // Max 15 degree tilt
+
+            // Left platform
+            const leftPlatform = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            leftPlatform.setAttribute('transform', `rotate(${-diff} 150 220)`);
+
+            const leftRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            leftRect.setAttribute('x', '70');
+            leftRect.setAttribute('y', '215');
+            leftRect.setAttribute('width', '60');
+            leftRect.setAttribute('height', '15');
+            leftRect.setAttribute('fill', 'var(--cyan)');
+            leftRect.setAttribute('rx', '3');
+            leftPlatform.appendChild(leftRect);
+
+            // Left circle (object A)
+            const leftCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            leftCircle.setAttribute('cx', '100');
+            leftCircle.setAttribute('cy', '180');
+            leftCircle.setAttribute('r', '12 + ' + (weightA / 100 * 8));
+            leftCircle.setAttribute('fill', 'var(--cyan)');
+            leftCircle.setAttribute('opacity', '0.7');
+            leftPlatform.appendChild(leftCircle);
+
+            svg.appendChild(leftPlatform);
+
+            // Right platform
+            const rightPlatform = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            rightPlatform.setAttribute('transform', `rotate(${diff} 150 220)`);
+
+            const rightRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rightRect.setAttribute('x', '170');
+            rightRect.setAttribute('y', '215');
+            rightRect.setAttribute('width', '60');
+            rightRect.setAttribute('height', '15');
+            rightRect.setAttribute('fill', 'var(--pink)');
+            rightRect.setAttribute('rx', '3');
+            rightPlatform.appendChild(rightRect);
+
+            // Right circle (object B)
+            const rightCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            rightCircle.setAttribute('cx', '200');
+            rightCircle.setAttribute('cy', '180');
+            rightCircle.setAttribute('r', '12 + ' + (weightB / 100 * 8));
+            rightCircle.setAttribute('fill', 'var(--pink)');
+            rightCircle.setAttribute('opacity', '0.7');
+            rightPlatform.appendChild(rightCircle);
+
+            svg.appendChild(rightPlatform);
+
+            // Labels
+            const labelA = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            labelA.setAttribute('x', '100');
+            labelA.setAttribute('y', '250');
+            labelA.setAttribute('text-anchor', 'middle');
+            labelA.setAttribute('fill', 'var(--text2)');
+            labelA.setAttribute('font-size', '12');
+            labelA.setAttribute('font-weight', '600');
+            labelA.textContent = 'A: ' + weightA;
+            svg.appendChild(labelA);
+
+            const labelB = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            labelB.setAttribute('x', '200');
+            labelB.setAttribute('y', '250');
+            labelB.setAttribute('text-anchor', 'middle');
+            labelB.setAttribute('fill', 'var(--text2)');
+            labelB.setAttribute('font-size', '12');
+            labelB.setAttribute('font-weight', '600');
+            labelB.textContent = 'B: ' + weightB;
+            svg.appendChild(labelB);
+
+            return svg;
+        }
+
+        function createCapacityDemo() {
+            const demo = document.createElement('div');
+            demo.className = 'capacity-demo';
+
+            const container = document.createElement('div');
+            container.className = 'capacity-container';
+
+            // Cup A
+            const cupItemA = document.createElement('div');
+            cupItemA.className = 'cup-item';
+
+            const cupA = document.createElement('div');
+            cupA.className = 'cup';
+
+            const fillA = document.createElement('div');
+            fillA.className = 'cup-fill';
+            fillA.style.height = state.capacityA + '%';
+            cupA.appendChild(fillA);
+            cupItemA.appendChild(cupA);
+
+            const labelA = document.createElement('div');
+            labelA.className = 'cup-label';
+            labelA.textContent = 'Cup A';
+            cupItemA.appendChild(labelA);
+
+            const valueA = document.createElement('div');
+            valueA.className = 'capacity-value';
+            valueA.textContent = state.capacityA + ' units';
+            cupItemA.appendChild(valueA);
+
+            container.appendChild(cupItemA);
+
+            // Cup B
+            const cupItemB = document.createElement('div');
+            cupItemB.className = 'cup-item';
+
+            const cupB = document.createElement('div');
+            cupB.className = 'cup';
+
+            const fillB = document.createElement('div');
+            fillB.className = 'cup-fill';
+            fillB.style.height = state.capacityB + '%';
+            cupB.appendChild(fillB);
+            cupItemB.appendChild(cupB);
+
+            const labelB = document.createElement('div');
+            labelB.className = 'cup-label';
+            labelB.textContent = 'Cup B';
+            cupItemB.appendChild(labelB);
+
+            const valueB = document.createElement('div');
+            valueB.className = 'capacity-value';
+            valueB.textContent = state.capacityB + ' units';
+            cupItemB.appendChild(valueB);
+
+            container.appendChild(cupItemB);
+
+            demo.appendChild(container);
+
+            // Sliders
+            const sliderContainer = document.createElement('div');
+            sliderContainer.style.display = 'flex';
+            sliderContainer.style.flexDirection = 'column';
+            sliderContainer.style.gap = '16px';
+
+            const sliderA = document.createElement('input');
+            sliderA.type = 'range';
+            sliderA.className = 'slider';
+            sliderA.min = '0';
+            sliderA.max = '100';
+            sliderA.value = state.capacityA;
+            sliderA.addEventListener('input', (e) => {
+                state.capacityA = parseInt(e.target.value);
+                renderExplore(document.getElementById('workspace'));
+            });
+            sliderContainer.appendChild(sliderA);
+
+            const sliderB = document.createElement('input');
+            sliderB.type = 'range';
+            sliderB.className = 'slider';
+            sliderB.min = '0';
+            sliderB.max = '100';
+            sliderB.value = state.capacityB;
+            sliderB.addEventListener('input', (e) => {
+                state.capacityB = parseInt(e.target.value);
+                renderExplore(document.getElementById('workspace'));
+            });
+            sliderContainer.appendChild(sliderB);
+
+            demo.appendChild(sliderContainer);
+
+            // Comparison text
+            const comparison = document.createElement('div');
+            comparison.className = 'comparison-text';
+
+            if (state.capacityA > state.capacityB) {
+                comparison.textContent = '🥤 Cup A holds MORE liquid';
+            } else if (state.capacityB > state.capacityA) {
+                comparison.textContent = '🥤 Cup B holds MORE liquid';
+            } else {
+                comparison.textContent = '🥤 Both cups hold the SAME amount';
+            }
+
+            demo.appendChild(comparison);
+
+            return demo;
+        }
+
+        // ============= PRACTICE MODE =============
+        function renderPractice(container) {
+            const div = document.createElement('div');
+            div.className = 'practice-section';
+
+            const header = document.createElement('h2');
+            header.className = 'explore-header';
+            header.textContent = '✏️ Practice: Answer Questions';
+            div.appendChild(header);
+
+            // Score bar
+            const scoreBar = document.createElement('div');
+            scoreBar.className = 'score-bar';
+            scoreBar.innerHTML = `<span>Progress:</span> <span class="score-display">${state.score}/${state.total}</span>`;
+            div.appendChild(scoreBar);
+
+            if (state.total === 0 || state.currentQuestion === null) {
+                generatePracticeQuestion();
+            }
+
+            const question = state.currentQuestion;
+
+            const card = document.createElement('div');
+            card.className = 'question-card';
+
+            const title = document.createElement('h3');
+            title.className = 'question-title';
+            title.textContent = question.question;
+            card.appendChild(title);
+
+            const display = document.createElement('div');
+            display.className = 'objects-display';
+
+            // Object A visualization
+            const objA = document.createElement('div');
+            objA.className = 'object-item';
+
+            const labelA = document.createElement('div');
+            labelA.className = 'object-label';
+            labelA.textContent = 'Object A';
+            objA.appendChild(labelA);
+
+            if (question.attribute === 'length') {
+                const bar = document.createElement('div');
+                bar.className = 'bar bar-a';
+                bar.style.width = '60px';
+                bar.style.height = question.valueA + 'px';
+                objA.appendChild(bar);
+            } else if (question.attribute === 'weight') {
+                const circle = document.createElement('div');
+                circle.style.width = (20 + question.valueA / 10) + 'px';
+                circle.style.height = (20 + question.valueA / 10) + 'px';
+                circle.style.borderRadius = '50%';
+                circle.style.background = 'linear-gradient(135deg, #00d4ff, #0099cc)';
+                circle.style.boxShadow = '0 4px 12px var(--shadow)';
+                objA.appendChild(circle);
+            } else if (question.attribute === 'capacity') {
+                const cup = document.createElement('div');
+                cup.className = 'cup';
+                const fill = document.createElement('div');
+                fill.className = 'cup-fill';
+                fill.style.height = question.valueA + '%';
+                cup.appendChild(fill);
+                objA.appendChild(cup);
+            }
+
+            display.appendChild(objA);
+
+            // Object B visualization
+            const objB = document.createElement('div');
+            objB.className = 'object-item';
+
+            const labelB = document.createElement('div');
+            labelB.className = 'object-label';
+            labelB.textContent = 'Object B';
+            objB.appendChild(labelB);
+
+            if (question.attribute === 'length') {
+                const bar = document.createElement('div');
+                bar.className = 'bar bar-b';
+                bar.style.width = '60px';
+                bar.style.height = question.valueB + 'px';
+                objB.appendChild(bar);
+            } else if (question.attribute === 'weight') {
+                const circle = document.createElement('div');
+                circle.style.width = (20 + question.valueB / 10) + 'px';
+                circle.style.height = (20 + question.valueB / 10) + 'px';
+                circle.style.borderRadius = '50%';
+                circle.style.background = 'linear-gradient(135deg, #ff69b4, #cc0066)';
+                circle.style.boxShadow = '0 4px 12px var(--shadow)';
+                objB.appendChild(circle);
+            } else if (question.attribute === 'capacity') {
+                const cup = document.createElement('div');
+                cup.className = 'cup';
+                const fill = document.createElement('div');
+                fill.className = 'cup-fill';
+                fill.style.height = question.valueB + '%';
+                cup.appendChild(fill);
+                objB.appendChild(cup);
+            }
+
+            display.appendChild(objB);
+
+            card.appendChild(display);
+
+            // Answer buttons
+            const answerContainer = document.createElement('div');
+            answerContainer.className = question.answer === 'same' ? 'answer-buttons three-col' : 'answer-buttons';
+
+            if (question.answer === 'A') {
+                const btnA = createAnswerButton('A', () => checkAnswer('A', question));
+                const btnB = createAnswerButton('B', () => checkAnswer('B', question));
+                answerContainer.appendChild(btnA);
+                answerContainer.appendChild(btnB);
+            } else if (question.answer === 'B') {
+                const btnA = createAnswerButton('A', () => checkAnswer('A', question));
+                const btnB = createAnswerButton('B', () => checkAnswer('B', question));
+                answerContainer.appendChild(btnA);
+                answerContainer.appendChild(btnB);
+            } else {
+                const btnA = createAnswerButton('A', () => checkAnswer('A', question));
+                const btnB = createAnswerButton('B', () => checkAnswer('B', question));
+                const btnSame = createAnswerButton('Same', () => checkAnswer('same', question));
+                answerContainer.appendChild(btnA);
+                answerContainer.appendChild(btnB);
+                answerContainer.appendChild(btnSame);
+            }
+
+            card.appendChild(answerContainer);
+
+            // Feedback
+            const feedback = document.createElement('div');
+            feedback.id = 'feedback';
+            feedback.className = 'feedback';
+            card.appendChild(feedback);
+
+            // Next button (hidden initially)
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'next-btn hidden';
+            nextBtn.textContent = 'Next Question';
+            nextBtn.id = 'next-btn';
+            nextBtn.onclick = () => {
+                renderPractice(container);
+            };
+            card.appendChild(nextBtn);
+
+            div.appendChild(card);
+            container.appendChild(div);
+        }
+
+        function createAnswerButton(label, onclick) {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.textContent = label;
+            btn.onclick = onclick;
+            return btn;
+        }
+
+        function generatePracticeQuestion() {
+            state.total++;
+
+            const attributes = state.difficulty === 'emergent'
+                ? ['length']
+                : state.difficulty === 'proficient'
+                ? ['length', 'weight']
+                : ['length', 'weight', 'capacity'];
+
+            const attribute = attributes[Math.floor(Math.random() * attributes.length)];
+
+            let valueA, valueB, answer, question;
+
+            if (attribute === 'length') {
+                valueA = 40 + Math.random() * 80;
+                valueB = 40 + Math.random() * 80;
+
+                if (valueA > valueB + 10) {
+                    answer = 'A';
+                    question = 'Which object is LONGER?';
+                } else if (valueB > valueA + 10) {
+                    answer = 'B';
+                    question = 'Which object is LONGER?';
+                } else {
+                    answer = 'same';
+                    question = 'Which is longer, or are they the same?';
+                    valueB = valueA;
+                }
+            } else if (attribute === 'weight') {
+                valueA = 20 + Math.random() * 60;
+                valueB = 20 + Math.random() * 60;
+
+                if (valueA > valueB + 10) {
+                    answer = 'A';
+                    question = 'Which object is HEAVIER?';
+                } else if (valueB > valueA + 10) {
+                    answer = 'B';
+                    question = 'Which object is HEAVIER?';
+                } else {
+                    answer = 'same';
+                    question = 'Which is heavier, or are they the same?';
+                    valueB = valueA;
+                }
+            } else {
+                valueA = 20 + Math.random() * 60;
+                valueB = 20 + Math.random() * 60;
+
+                if (valueA > valueB + 10) {
+                    answer = 'A';
+                    question = 'Which container holds MORE liquid?';
+                } else if (valueB > valueA + 10) {
+                    answer = 'B';
+                    question = 'Which container holds MORE liquid?';
+                } else {
+                    answer = 'same';
+                    question = 'Which holds more, or do they hold the same?';
+                    valueB = valueA;
+                }
+            }
+
+            state.currentQuestion = {
+                question,
+                attribute,
+                valueA: Math.round(valueA),
+                valueB: Math.round(valueB),
+                answer
+            };
+        }
+
+        function checkAnswer(userAnswer, question) {
+            const isCorrect = userAnswer === question.answer;
+
+            if (isCorrect) {
+                state.score++;
+            }
+
+            // Update button states
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent.includes(question.answer.charAt(0).toUpperCase() || btn.textContent === 'Same' && question.answer === 'same')) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent.includes(userAnswer.charAt(0).toUpperCase() || btn.textContent === 'Same' && userAnswer === 'same') && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Show feedback
+            showFB(isCorrect ? '✓ Correct!' : 'Try again!', isCorrect ? 'correct' : 'incorrect');
+
+            // Show next button
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        // ============= PLAY MODE =============
+        function renderPlay(container) {
+            if (!state.gameActive) {
+                startPlayGame(container);
+            } else {
+                updatePlayGame(container);
+            }
+        }
+
+        function startPlayGame(container) {
+            state.gameActive = true;
+            state.timeLeft = 60;
+            state.score = 0;
+            state.streak = 0;
+            state.currentQuestion = null;
+            generatePlayQuestion();
+
+            updatePlayGame(container);
+
+            state.timer = setInterval(() => {
+                state.timeLeft--;
+                updatePlayGame(container);
+
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.timer);
+                    endPlayGame(container);
+                }
+            }, 1000);
+        }
+
+        function updatePlayGame(container) {
+            container.innerHTML = '';
+
+            const div = document.createElement('div');
+            div.className = 'play-section';
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'play-header';
+
+            const timerDisplay = document.createElement('div');
+            timerDisplay.className = 'timer-display';
+
+            const timerValue = document.createElement('div');
+            timerValue.className = 'timer-value';
+            timerValue.textContent = state.timeLeft;
+            timerDisplay.appendChild(timerValue);
+
+            const timerBar = document.createElement('div');
+            timerBar.className = 'timer-bar';
+
+            const timerBarFill = document.createElement('div');
+            timerBarFill.className = 'timer-bar-fill';
+            timerBarFill.style.width = (state.timeLeft / 60 * 100) + '%';
+            timerBar.appendChild(timerBarFill);
+
+            timerDisplay.appendChild(timerBar);
+            header.appendChild(timerDisplay);
+
+            const streakDisplay = document.createElement('div');
+            streakDisplay.className = 'streak-display';
+
+            const streakLabel = document.createElement('div');
+            streakLabel.className = 'streak-label';
+            streakLabel.textContent = '🔥 Streak';
+            streakDisplay.appendChild(streakLabel);
+
+            const streakValue = document.createElement('div');
+            streakValue.className = 'streak-value';
+            streakValue.textContent = state.streak;
+            streakDisplay.appendChild(streakValue);
+
+            header.appendChild(streakDisplay);
+            div.appendChild(header);
+
+            // Question card
+            const card = document.createElement('div');
+            card.className = 'play-card';
+
+            const question = document.createElement('div');
+            question.className = 'play-question';
+            question.textContent = state.currentQuestion.question;
+            card.appendChild(question);
+
+            // Objects display
+            const objDisplay = document.createElement('div');
+            objDisplay.className = 'play-objects';
+
+            const objA = document.createElement('div');
+            objA.className = 'object-item';
+
+            if (state.currentQuestion.attribute === 'length') {
+                const bar = document.createElement('div');
+                bar.className = 'bar bar-a';
+                bar.style.width = '50px';
+                bar.style.height = state.currentQuestion.valueA + 'px';
+                objA.appendChild(bar);
+            } else if (state.currentQuestion.attribute === 'weight') {
+                const circle = document.createElement('div');
+                circle.style.width = (16 + state.currentQuestion.valueA / 15) + 'px';
+                circle.style.height = (16 + state.currentQuestion.valueA / 15) + 'px';
+                circle.style.borderRadius = '50%';
+                circle.style.background = 'linear-gradient(135deg, #00d4ff, #0099cc)';
+                circle.style.boxShadow = '0 4px 12px var(--shadow)';
+                objA.appendChild(circle);
+            } else {
+                const cup = document.createElement('div');
+                cup.className = 'cup';
+                cup.style.width = '60px';
+                cup.style.height = '90px';
+                const fill = document.createElement('div');
+                fill.className = 'cup-fill';
+                fill.style.height = state.currentQuestion.valueA + '%';
+                cup.appendChild(fill);
+                objA.appendChild(cup);
+            }
+
+            objDisplay.appendChild(objA);
+
+            const objB = document.createElement('div');
+            objB.className = 'object-item';
+
+            if (state.currentQuestion.attribute === 'length') {
+                const bar = document.createElement('div');
+                bar.className = 'bar bar-b';
+                bar.style.width = '50px';
+                bar.style.height = state.currentQuestion.valueB + 'px';
+                objB.appendChild(bar);
+            } else if (state.currentQuestion.attribute === 'weight') {
+                const circle = document.createElement('div');
+                circle.style.width = (16 + state.currentQuestion.valueB / 15) + 'px';
+                circle.style.height = (16 + state.currentQuestion.valueB / 15) + 'px';
+                circle.style.borderRadius = '50%';
+                circle.style.background = 'linear-gradient(135deg, #ff69b4, #cc0066)';
+                circle.style.boxShadow = '0 4px 12px var(--shadow)';
+                objB.appendChild(circle);
+            } else {
+                const cup = document.createElement('div');
+                cup.className = 'cup';
+                cup.style.width = '60px';
+                cup.style.height = '90px';
+                const fill = document.createElement('div');
+                fill.className = 'cup-fill';
+                fill.style.height = state.currentQuestion.valueB + '%';
+                cup.appendChild(fill);
+                objB.appendChild(cup);
+            }
+
+            objDisplay.appendChild(objB);
+
+            card.appendChild(objDisplay);
+
+            // Answer buttons
+            const answerBtns = document.createElement('div');
+            answerBtns.className = 'play-answer-buttons';
+
+            const btnA = document.createElement('button');
+            btnA.className = 'play-answer-btn';
+            btnA.textContent = 'Object A';
+            btnA.onclick = () => checkPlayAnswer('A');
+            answerBtns.appendChild(btnA);
+
+            const btnB = document.createElement('button');
+            btnB.className = 'play-answer-btn';
+            btnB.textContent = 'Object B';
+            btnB.onclick = () => checkPlayAnswer('B');
+            answerBtns.appendChild(btnB);
+
+            card.appendChild(answerBtns);
+
+            div.appendChild(card);
+            container.appendChild(div);
+        }
+
+        function generatePlayQuestion() {
+            const attributes = state.difficulty === 'emergent'
+                ? ['length']
+                : state.difficulty === 'proficient'
+                ? ['length', 'weight']
+                : ['length', 'weight', 'capacity'];
+
+            const attribute = attributes[Math.floor(Math.random() * attributes.length)];
+
+            let valueA, valueB, answer, question;
+
+            if (attribute === 'length') {
+                valueA = 40 + Math.random() * 80;
+                valueB = 40 + Math.random() * 80;
+
+                if (Math.random() > 0.5) {
+                    if (valueA > valueB) {
+                        answer = 'A';
+                    } else {
+                        answer = 'B';
+                        [valueA, valueB] = [valueB, valueA];
+                    }
+                } else {
+                    if (valueB > valueA) {
+                        answer = 'B';
+                    } else {
+                        answer = 'A';
+                        [valueA, valueB] = [valueB, valueA];
+                    }
+                }
+                question = 'Which is LONGER?';
+            } else if (attribute === 'weight') {
+                valueA = 20 + Math.random() * 60;
+                valueB = 20 + Math.random() * 60;
+
+                if (Math.random() > 0.5) {
+                    if (valueA > valueB) {
+                        answer = 'A';
+                    } else {
+                        answer = 'B';
+                        [valueA, valueB] = [valueB, valueA];
+                    }
+                } else {
+                    if (valueB > valueA) {
+                        answer = 'B';
+                    } else {
+                        answer = 'A';
+                        [valueA, valueB] = [valueB, valueA];
+                    }
+                }
+                question = 'Which is HEAVIER?';
+            } else {
+                valueA = 20 + Math.random() * 60;
+                valueB = 20 + Math.random() * 60;
+
+                if (Math.random() > 0.5) {
+                    if (valueA > valueB) {
+                        answer = 'A';
+                    } else {
+                        answer = 'B';
+                        [valueA, valueB] = [valueB, valueA];
+                    }
+                } else {
+                    if (valueB > valueA) {
+                        answer = 'B';
+                    } else {
+                        answer = 'A';
+                        [valueA, valueB] = [valueB, valueA];
+                    }
+                }
+                question = 'Which holds MORE?';
+            }
+
+            state.currentQuestion = {
+                question,
+                attribute,
+                valueA: Math.round(valueA),
+                valueB: Math.round(valueB),
+                answer
+            };
+        }
+
+        function checkPlayAnswer(userAnswer) {
+            const isCorrect = userAnswer === state.currentQuestion.answer;
+
+            if (isCorrect) {
+                state.score++;
+                state.streak++;
+                showFB('✓ Correct!', 'correct');
+            } else {
+                state.streak = 0;
+                showFB('Try again!', 'incorrect');
+            }
+
+            // Disable buttons
+            document.querySelectorAll('.play-answer-btn').forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent.includes(state.currentQuestion.answer.charAt(0).toUpperCase())) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent.includes(userAnswer.charAt(0).toUpperCase()) && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Generate next question after short delay
+            setTimeout(() => {
+                if (state.timeLeft > 0) {
+                    generatePlayQuestion();
+                    updatePlayGame(document.getElementById('workspace'));
+                }
+            }, 1200);
+        }
+
+        function endPlayGame(container) {
+            state.gameActive = false;
+
+            const div = document.createElement('div');
+            div.className = 'play-section';
+
+            const gameOverDiv = document.createElement('div');
+            gameOverDiv.className = 'game-over';
+
+            const title = document.createElement('div');
+            title.className = 'game-over-title';
+            title.textContent = '🎉 Game Over!';
+            gameOverDiv.appendChild(title);
+
+            const score = document.createElement('div');
+            score.className = 'final-score';
+            score.textContent = state.score;
+            gameOverDiv.appendChild(score);
+
+            const stars = document.createElement('div');
+            stars.className = 'star-rating';
+
+            let starCount = 0;
+            if (state.score >= 20) starCount = 3;
+            else if (state.score >= 10) starCount = 2;
+            else if (state.score >= 5) starCount = 1;
+
+            for (let i = 0; i < 3; i++) {
+                stars.textContent += i < starCount ? '⭐' : '☆';
+            }
+
+            gameOverDiv.appendChild(stars);
+
+            const restartBtn = document.createElement('button');
+            restartBtn.className = 'restart-btn';
+            restartBtn.textContent = 'Play Again';
+            restartBtn.onclick = () => {
+                renderPlay(container);
+            };
+            gameOverDiv.appendChild(restartBtn);
+
+            div.appendChild(gameOverDiv);
+            container.appendChild(div);
+        }
+
+        // ============= INITIALIZATION =============
+        renderWorkspace();
+    </script>
+</body>
+</html>
